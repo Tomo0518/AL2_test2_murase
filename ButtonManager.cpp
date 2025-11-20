@@ -14,7 +14,8 @@ ButtonManager::ButtonManager() {
 }
 
 void ButtonManager::AddButton(const Vector2& position, const Vector2& size, const std::string& label, std::function<void()> callback) {
-	buttons_.emplace_back(position, size, label, callback);
+	Button newButton(position, size, label, callback);
+	buttons_.push_back(std::move(newButton)); // ムーブで追加
 }
 
 void ButtonManager::AddButton(const Button& button) {
@@ -29,6 +30,12 @@ void ButtonManager::ClearButtons() {
 void ButtonManager::SetSelectedIndex(int index) {
 	if (!buttons_.empty()) {
 		selectedIndex_ = std::clamp(index, 0, static_cast<int>(buttons_.size()) - 1);
+	}
+}
+
+void ButtonManager::SetButtonTexture(int textureHandle) {
+	for (auto& button : buttons_) {
+		button.SetTexture(textureHandle);
 	}
 }
 
@@ -82,11 +89,12 @@ void ButtonManager::Update(float deltaTime, const char* keys, const char* preKey
 }
 
 void ButtonManager::HandleKeyboardInput(const char* keys, const char* preKeys) {
+	if (buttons_.empty()) return;
+
 	// 上キー（W）
 	if (!preKeys[DIK_W] && keys[DIK_W]) {
 		if (loopNavigation_) {
-
-			selectedIndex_ = static_cast<int>((selectedIndex_ + static_cast<int>(buttons_.size()) - 1) % static_cast<int>(buttons_.size()));
+			selectedIndex_ = (selectedIndex_ + static_cast<int>(buttons_.size()) - 1) % static_cast<int>(buttons_.size());
 		}
 		else {
 			selectedIndex_ = std::max(0, selectedIndex_ - 1);
@@ -96,7 +104,7 @@ void ButtonManager::HandleKeyboardInput(const char* keys, const char* preKeys) {
 	// 下キー（S）
 	if (!preKeys[DIK_S] && keys[DIK_S]) {
 		if (loopNavigation_) {
-			selectedIndex_ = (selectedIndex_ + 1) % buttons_.size();
+			selectedIndex_ = (selectedIndex_ + 1) % static_cast<int>(buttons_.size());
 		}
 		else {
 			selectedIndex_ = std::min(static_cast<int>(buttons_.size()) - 1, selectedIndex_ + 1);
@@ -105,6 +113,8 @@ void ButtonManager::HandleKeyboardInput(const char* keys, const char* preKeys) {
 }
 
 void ButtonManager::HandlePadInput(Pad& pad) {
+	if (buttons_.empty()) return;
+
 	float ly = pad.LeftY();
 	const float threshold = 0.5f;
 
@@ -118,7 +128,7 @@ void ButtonManager::HandlePadInput(Pad& pad) {
 
 	if (padUp) {
 		if (loopNavigation_) {
-			selectedIndex_ = static_cast<int>((selectedIndex_ + static_cast<int>(buttons_.size()) - 1) % static_cast<int>(buttons_.size()));
+			selectedIndex_ = (selectedIndex_ + static_cast<int>(buttons_.size()) - 1) % static_cast<int>(buttons_.size());
 		}
 		else {
 			selectedIndex_ = std::max(0, selectedIndex_ - 1);
@@ -127,7 +137,7 @@ void ButtonManager::HandlePadInput(Pad& pad) {
 
 	if (padDown) {
 		if (loopNavigation_) {
-			selectedIndex_ = (selectedIndex_ + 1) % buttons_.size();
+			selectedIndex_ = (selectedIndex_ + 1) % static_cast<int>(buttons_.size());
 		}
 		else {
 			selectedIndex_ = std::min(static_cast<int>(buttons_.size()) - 1, selectedIndex_ + 1);

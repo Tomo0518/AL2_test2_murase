@@ -33,16 +33,10 @@ public:
 	// ステージ関連の遷移
 	void RequestStage(int stageIndex); // Stage1～12への遷移
 	void RequestStageRestart(); // 現在のステージを再開
-	void RequestStageSelect(); // ステージセレクトに戻る
-	void RequestBackToTitle(); // タイトルに戻る
-
-	// ゲームプレイシーンへ
-	void RequestGamePlayScene(); // ゲームプレイシーンへ
 
 	// ポーズ関連
 	void RequestPause(); // ポーズ画面を開く
 	void RequestPauseResume(); // ポーズから復帰
-	void RequestPauseReturnToStageSelect(); // ポーズ→ステージセレクト
 	void RequestOpenSettings(); // 設定画面を開く（オーバーレイ）
 	void RequestCloseSettings(); // 設定画面を閉じる
 

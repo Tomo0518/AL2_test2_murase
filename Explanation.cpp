@@ -30,8 +30,8 @@ void ExplanationScene::Update(float dt, const char* keys, const char* pre) {
 
 		// 戻り先へ
 		switch (returnTo_) {
-		case SceneType::StageSelect: manager_.RequestStageSelect(); break;
-		case SceneType::Title: default: manager_.RequestBackToTitle(); break;
+		case SceneType::StageSelect: manager_.RequestTransition(SceneType::StageSelect); break;
+		case SceneType::Title: default: manager_.RequestTransition(SceneType::Title); break;
 		}
 	}
 }

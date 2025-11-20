@@ -1,93 +1,95 @@
 ﻿#include "DrawComponent2D.h"
-#include <cmath>
-#include <random>
+#include "Affine2D.h"
+#include <algorithm>
 
 // ========== コンストラクタ ==========
-DrawComponent2D::DrawComponent2D() {
-	width_ = 50.0f;
-	height_ = 50.0f;
-	vertex_.SetBySize(width_, height_);
-}
 
-DrawComponent2D::DrawComponent2D(const Vector2& center, const float width, const float height, Graph graph)
-	: position_(center), width_(width), height_(height), graph_(graph) {
-	vertex_.SetBySize(width, height);
-}
+DrawComponent2D::DrawComponent2D(int graphHandle, int divX, int divY,
+	int totalFrames, float speed, bool isLoop)
+	: graphHandle_(graphHandle) {
 
-DrawComponent2D::DrawComponent2D(const Vector2& center, const float width, const float height,
-	int grHandle, int grWidth, int grHeight, int totalFrames, int grSplit,
-	float animeSpeed, bool isLoop, unsigned int color)
-	: position_(center), width_(width), height_(height) {
+	// 画像サイズを自動取得
+	InitializeImageSize(divX, divY);
 
-	animation_ = std::make_unique<Animation>(grHandle, grWidth, grHeight, totalFrames, grSplit, animeSpeed, isLoop);
-	graph_ = Graph(grHandle, grWidth, grHeight, color);
-	vertex_.SetBySize(width, height);
+	// アニメーション作成
+	int frameWidth = static_cast<int>(imageSize_.x);
+	int frameHeight = static_cast<int>(imageSize_.y);
+	animation_ = std::make_unique<Animation>(
+		graphHandle, frameWidth, frameHeight, totalFrames, divX, speed, isLoop
+	);
 	animation_->Play();
 }
 
-DrawComponent2D::DrawComponent2D(const DrawComponent2D& drawcomp)
-	: width_(drawcomp.width_)
-	, height_(drawcomp.height_)
-	, scale_(drawcomp.scale_)
-	, position_(drawcomp.position_)
-	, angle_(drawcomp.angle_)
-	, pivot_(drawcomp.pivot_)
-	, graph_(drawcomp.graph_)
-	, vertex_(drawcomp.vertex_)
-	, animation_(nullptr)
-	, shakeEffect_(drawcomp.shakeEffect_)
-	, rotationEffect_(drawcomp.rotationEffect_)
-	, squashStretchEffect_(drawcomp.squashStretchEffect_)
-	, fadeEffect_(drawcomp.fadeEffect_)
-	, scaleEffect_(drawcomp.scaleEffect_)
-{
-	if (drawcomp.animation_) {
-		animation_ = std::make_unique<Animation>(*drawcomp.animation_);
-		if (drawcomp.animation_->IsPlaying()) {
-			animation_->Play();
-		}
+DrawComponent2D::DrawComponent2D(int graphHandle)
+	: graphHandle_(graphHandle) {
+
+	// 静止画として初期化（1x1分割、1フレーム）
+	InitializeImageSize(1, 1);
+
+	// 内部的には1フレームのアニメーションとして扱う
+	int frameWidth = static_cast<int>(imageSize_.x);
+	int frameHeight = static_cast<int>(imageSize_.y);
+	animation_ = std::make_unique<Animation>(
+		graphHandle, frameWidth, frameHeight, 1, 1, 0.0f, false
+	);
+}
+
+DrawComponent2D::DrawComponent2D()
+	: graphHandle_(-1), imageSize_{ 0.0f, 0.0f }, drawSize_{ 0.0f, 0.0f } {
+}
+
+// コピーコンストラクタ
+DrawComponent2D::DrawComponent2D(const DrawComponent2D& other)
+	: graphHandle_(other.graphHandle_)
+	, imageSize_(other.imageSize_)
+	, drawSize_(other.drawSize_)
+	, position_(other.position_)
+	, scale_(other.scale_)
+	, rotation_(other.rotation_)
+	, anchorPoint_(other.anchorPoint_)
+	, baseColor_(other.baseColor_)
+	, flipX_(other.flipX_)
+	, flipY_(other.flipY_)
+	, effect_(other.effect_) {
+
+	if (other.animation_) {
+		animation_ = std::make_unique<Animation>(*other.animation_);
 	}
 }
 
-DrawComponent2D::DrawComponent2D(DrawComponent2D&& drawcomp) noexcept
-	: width_(drawcomp.width_)
-	, height_(drawcomp.height_)
-	, scale_(drawcomp.scale_)
-	, position_(drawcomp.position_)
-	, angle_(drawcomp.angle_)
-	, pivot_(drawcomp.pivot_)
-	, graph_(drawcomp.graph_)
-	, vertex_(drawcomp.vertex_)
-	, animation_(std::move(drawcomp.animation_))
-	, shakeEffect_(drawcomp.shakeEffect_)
-	, rotationEffect_(drawcomp.rotationEffect_)
-	, squashStretchEffect_(drawcomp.squashStretchEffect_)
-	, fadeEffect_(drawcomp.fadeEffect_)
-	, scaleEffect_(drawcomp.scaleEffect_)
-{
+// ムーブコンストラクタ
+DrawComponent2D::DrawComponent2D(DrawComponent2D&& other) noexcept
+	: graphHandle_(other.graphHandle_)
+	, imageSize_(other.imageSize_)
+	, drawSize_(other.drawSize_)
+	, position_(other.position_)
+	, scale_(other.scale_)
+	, rotation_(other.rotation_)
+	, anchorPoint_(other.anchorPoint_)
+	, baseColor_(other.baseColor_)
+	, flipX_(other.flipX_)
+	, flipY_(other.flipY_)
+	, animation_(std::move(other.animation_))
+	, effect_(std::move(other.effect_)) {
 }
 
-DrawComponent2D& DrawComponent2D::operator=(const DrawComponent2D& drawcomp) {
-	if (this != &drawcomp) {
-		width_ = drawcomp.width_;
-		height_ = drawcomp.height_;
-		scale_ = drawcomp.scale_;
-		position_ = drawcomp.position_;
-		angle_ = drawcomp.angle_;
-		pivot_ = drawcomp.pivot_;
-		graph_ = drawcomp.graph_;
-		vertex_ = drawcomp.vertex_;
-		shakeEffect_ = drawcomp.shakeEffect_;
-		rotationEffect_ = drawcomp.rotationEffect_;
-		squashStretchEffect_ = drawcomp.squashStretchEffect_;
-		fadeEffect_ = drawcomp.fadeEffect_;
-		scaleEffect_ = drawcomp.scaleEffect_;
+// コピー代入演算子
+DrawComponent2D& DrawComponent2D::operator=(const DrawComponent2D& other) {
+	if (this != &other) {
+		graphHandle_ = other.graphHandle_;
+		imageSize_ = other.imageSize_;
+		drawSize_ = other.drawSize_;
+		position_ = other.position_;
+		scale_ = other.scale_;
+		rotation_ = other.rotation_;
+		anchorPoint_ = other.anchorPoint_;
+		baseColor_ = other.baseColor_;
+		flipX_ = other.flipX_;
+		flipY_ = other.flipY_;
+		effect_ = other.effect_;
 
-		if (drawcomp.animation_) {
-			animation_ = std::make_unique<Animation>(*drawcomp.animation_);
-			if (drawcomp.animation_->IsPlaying()) {
-				animation_->Play();
-			}
+		if (other.animation_) {
+			animation_ = std::make_unique<Animation>(*other.animation_);
 		}
 		else {
 			animation_.reset();
@@ -96,814 +98,276 @@ DrawComponent2D& DrawComponent2D::operator=(const DrawComponent2D& drawcomp) {
 	return *this;
 }
 
-DrawComponent2D& DrawComponent2D::operator=(DrawComponent2D&& drawcomp) noexcept {
-	if (this != &drawcomp) {
-		width_ = drawcomp.width_;
-		height_ = drawcomp.height_;
-		scale_ = drawcomp.scale_;
-		position_ = drawcomp.position_;
-		angle_ = drawcomp.angle_;
-		pivot_ = drawcomp.pivot_;
-		graph_ = drawcomp.graph_;
-		vertex_ = drawcomp.vertex_;
-		animation_ = std::move(drawcomp.animation_);
-		shakeEffect_ = drawcomp.shakeEffect_;
-		rotationEffect_ = drawcomp.rotationEffect_;
-		squashStretchEffect_ = drawcomp.squashStretchEffect_;
-		fadeEffect_ = drawcomp.fadeEffect_;
-		scaleEffect_ = drawcomp.scaleEffect_;
+// ムーブ代入演算子
+DrawComponent2D& DrawComponent2D::operator=(DrawComponent2D&& other) noexcept {
+	if (this != &other) {
+		graphHandle_ = other.graphHandle_;
+		imageSize_ = other.imageSize_;
+		drawSize_ = other.drawSize_;
+		position_ = other.position_;
+		scale_ = other.scale_;
+		rotation_ = other.rotation_;
+		anchorPoint_ = other.anchorPoint_;
+		baseColor_ = other.baseColor_;
+		flipX_ = other.flipX_;
+		flipY_ = other.flipY_;
+		animation_ = std::move(other.animation_);
+		effect_ = std::move(other.effect_);
 	}
 	return *this;
 }
 
-// ========== グラフ設定 ==========
-void DrawComponent2D::SetGraph(int grHandle, unsigned int grDrawWidth, unsigned int grDrawHeight, unsigned int color) {
-	graph_.handle = grHandle;
-	graph_.grDrawWidth = grDrawWidth;
-	graph_.grDrawHeight = grDrawHeight;
-	graph_.color = color;
-}
-
-// ========== アニメーション制御 ==========
-void DrawComponent2D::SetAnimation(std::unique_ptr<Animation> animation) {
-	animation_ = std::move(animation);
-}
-
-void DrawComponent2D::PlayAnimation() {
-	if (animation_) {
-		animation_->Play();
+// ========== 初期化 ==========
+void DrawComponent2D::InitializeImageSize(int divX, int divY) {
+	if (graphHandle_ < 0) {
+		imageSize_ = { 0.0f, 0.0f };
+		drawSize_ = { 0.0f, 0.0f };
+		return;
 	}
-}
 
-void DrawComponent2D::StopAnimation() {
-	if (animation_) {
-		animation_->Stop();
-	}
-}
+	// Novice::GetGraphSize で画像全体のサイズを取得
+	int fullWidth = 0, fullHeight = 0;
+	Novice::GetTextureSize(graphHandle_, &fullWidth, &fullHeight);
 
-void DrawComponent2D::UpdateAnimation(float deltaTime) {
-	if (animation_) {
-		animation_->Update(deltaTime);
-	}
-}
+	// 1フレーム分のサイズを計算
+	imageSize_.x = static_cast<float>(fullWidth) / divX;
+	imageSize_.y = static_cast<float>(fullHeight) / divY;
 
-void DrawComponent2D::UpdateAnimation(float deltaTime, const Vector2& center, const float angle, const Vector2& scale) {
-	position_ = center;
-	angle_ = angle;
-	scale_ = scale;
-
-	if (animation_) {
-		animation_->Update(deltaTime);
-	}
+	// 描画サイズのデフォルトは画像サイズと同じ
+	drawSize_ = imageSize_;
 }
 
 // ========== 更新 ==========
-void DrawComponent2D::Update() {
-	vertex_.SetBySize(width_, height_);
-}
 
-void DrawComponent2D::Update(const Vector2& center, const Vector2& scale, const float rotate, const float width, const float height, Graph graph) {
-	position_ = center;
-	scale_ = scale;
-	angle_ = rotate;
-	width_ = width;
-	height_ = height;
-	graph_ = graph;
-	vertex_.SetBySize(width, height);
-}
-
-void DrawComponent2D::UpdateEffects(float deltaTime) {
-	UpdateShake(deltaTime);
-	UpdateRotation(deltaTime);
-	UpdateSquashStretch(deltaTime);
-	UpdateFade(deltaTime);
-	UpdateScale(deltaTime);
-	UpdateScaleExtinction(deltaTime);
-}
-
-// ========== シェイク効果 ==========
-void DrawComponent2D::StartShake(float range, float duration) {
-	shakeEffect_.isActive = true;
-	shakeEffect_.range = range;
-	shakeEffect_.duration = duration;
-	shakeEffect_.elapsed = 0.0f;
-	shakeEffect_.continuous = false;
-}
-
-void DrawComponent2D::StartShakeContinuous(float range) {
-	shakeEffect_.isActive = true;
-	shakeEffect_.range = range;
-	shakeEffect_.continuous = true;
-	shakeEffect_.elapsed = 0.0f;
-}
-
-void DrawComponent2D::StopShake() {
-	shakeEffect_.isActive = false;
-	shakeEffect_.offset = { 0.0f, 0.0f };
-}
-
-void DrawComponent2D::UpdateShake(float deltaTime) {
-	if (!shakeEffect_.isActive) {
-		return;
+void DrawComponent2D::Update(float deltaTime) {
+	// アニメーション更新
+	if (animation_) {
+		animation_->Update(deltaTime);
 	}
 
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> dist(-shakeEffect_.range, shakeEffect_.range);
-
-	shakeEffect_.offset.x = dist(gen);
-	shakeEffect_.offset.y = dist(gen);
-
-	if (!shakeEffect_.continuous) {
-		shakeEffect_.elapsed += deltaTime;
-		if (shakeEffect_.elapsed >= shakeEffect_.duration) {
-			StopShake();
-		}
-	}
+	// エフェクト更新
+	effect_.Update(deltaTime);
 }
 
-// ========== 回転効果 ==========
-void DrawComponent2D::StartRotation(float speed, float duration) {
-	rotationEffect_.isActive = true;
-	rotationEffect_.speed = speed;
-	rotationEffect_.duration = duration;
-	rotationEffect_.elapsed = 0.0f;
-	rotationEffect_.continuous = false;
-	rotationEffect_.accumulatedAngle = 0.0f;
+// ========== 描画 ==========
+
+void DrawComponent2D::Draw(const Camera2D& camera) {
+	Matrix3x3 vpMatrix = camera.GetVpVpMatrix();
+	DrawInternal(&vpMatrix);
 }
 
-void DrawComponent2D::StartRotationContinuous(float speed) {
-	rotationEffect_.isActive = true;
-	rotationEffect_.speed = speed;
-	rotationEffect_.continuous = true;
-	rotationEffect_.elapsed = 0.0f;
-	rotationEffect_.accumulatedAngle = 0.0f;
+void DrawComponent2D::DrawWorld() {
+	DrawInternal(nullptr);
 }
 
-void DrawComponent2D::StopRotation() {
-	rotationEffect_.isActive = false;
-	rotationEffect_.accumulatedAngle = 0.0f;
+void DrawComponent2D::DrawScreen() {
+	// スクリーン座標用の変換（Y軸反転なし）
+	DrawInternal(nullptr);
 }
 
-void DrawComponent2D::UpdateRotation(float deltaTime) {
-	if (!rotationEffect_.isActive) {
-		return;
+void DrawComponent2D::DrawInternal(const Matrix3x3* vpMatrix) {
+	if (graphHandle_ < 0) return;
+
+	// エフェクト適用後の変換行列を取得
+	Matrix3x3 worldMatrix = GetFinalTransformMatrix();
+
+	// カメラ行列を適用
+	Matrix3x3 finalMatrix = worldMatrix;
+	if (vpMatrix) {
+		finalMatrix = Matrix3x3::Multiply(worldMatrix, *vpMatrix);
 	}
 
-	rotationEffect_.accumulatedAngle += rotationEffect_.speed * deltaTime;
+	// 頂点座標を計算
+	Vector2 localVertices[4];
+	/*float halfW = drawSize_.x * 0.5f;
+	float halfH = drawSize_.y * 0.5f;*/
 
-	if (!rotationEffect_.continuous) {
-		rotationEffect_.elapsed += deltaTime;
-		if (rotationEffect_.elapsed >= rotationEffect_.duration) {
-			StopRotation();
-		}
-	}
-}
+	// アンカーポイントを考慮したローカル座標
+	float anchorOffsetX = drawSize_.x * anchorPoint_.x;
+	float anchorOffsetY = drawSize_.y * anchorPoint_.y;
 
-// ========== 潰しと伸ばし効果 ==========
-void DrawComponent2D::StartSquashStretch(const Vector2& scaleAmount, float duration, int count) {
-	squashStretchEffect_.isActive = true;
-	squashStretchEffect_.scale = scaleAmount;
-	squashStretchEffect_.duration = duration;
-	squashStretchEffect_.maxCount = count;
-	squashStretchEffect_.currentCount = 0;
-	squashStretchEffect_.elapsed = 0.0f;
-	squashStretchEffect_.expanding = true;
-}
+	localVertices[0] = { -anchorOffsetX, -anchorOffsetY };               // 左上
+	localVertices[1] = { drawSize_.x - anchorOffsetX, -anchorOffsetY };  // 右上
+	localVertices[2] = { drawSize_.x - anchorOffsetX, drawSize_.y - anchorOffsetY }; // 右下
+	localVertices[3] = { -anchorOffsetX, drawSize_.y - anchorOffsetY };  // 左下
 
-void DrawComponent2D::UpdateSquashStretch(float deltaTime) {
-	if (!squashStretchEffect_.isActive) {
-		return;
+	// 変換行列を適用
+	Vector2 screenVertices[4];
+	for (int i = 0; i < 4; ++i) {
+		screenVertices[i] = Matrix3x3::Transform(localVertices[i], finalMatrix);
 	}
 
-	squashStretchEffect_.elapsed += deltaTime;
+	// ソース矩形を取得
+	int srcX, srcY, srcW, srcH;
+	GetSourceRect(srcX, srcY, srcW, srcH);
 
-	if (squashStretchEffect_.elapsed >= squashStretchEffect_.duration) {
-		squashStretchEffect_.elapsed = 0.0f;
-		squashStretchEffect_.expanding = !squashStretchEffect_.expanding;
-
-		if (!squashStretchEffect_.expanding) {
-			squashStretchEffect_.currentCount++;
-		}
-
-		if (squashStretchEffect_.currentCount >= squashStretchEffect_.maxCount) {
-			squashStretchEffect_.isActive = false;
-			squashStretchEffect_.scale = { 1.0f, 1.0f };
-		}
+	// 反転処理
+	if (flipX_) {
+		std::swap(screenVertices[0], screenVertices[1]);
+		std::swap(screenVertices[2], screenVertices[3]);
 	}
-}
-
-// ========== フェード効果（RGBA対応） ==========
-void DrawComponent2D::StartFade(float duration) {
-	fadeEffect_.isActive = true;
-	fadeEffect_.duration = duration;
-	fadeEffect_.elapsed = 0.0f;
-	fadeEffect_.colorTransition = false;
-
-	// 現在の色を取得してRGBAに変換
-	fadeEffect_.startColor = ColorRGBA::FromUInt(graph_.color);
-	fadeEffect_.currentColor = fadeEffect_.startColor;
-
-	// ターゲットはアルファだけ0にする（透明にする）
-	fadeEffect_.targetColor = fadeEffect_.startColor;
-	fadeEffect_.targetColor.a = 0.0f;
-}
-
-void DrawComponent2D::StartFadeToColor(unsigned int targetColor, float duration) {
-	fadeEffect_.isActive = true;
-	fadeEffect_.duration = duration;
-	fadeEffect_.elapsed = 0.0f;
-	fadeEffect_.colorTransition = true;
-
-	// 現在の色とターゲット色を設定
-	fadeEffect_.startColor = ColorRGBA::FromUInt(graph_.color);
-	fadeEffect_.targetColor = ColorRGBA::FromUInt(targetColor);
-	fadeEffect_.currentColor = fadeEffect_.startColor;
-}
-
-void DrawComponent2D::StartFadeToColor(const ColorRGBA& targetColor, float duration) {
-	fadeEffect_.isActive = true;
-	fadeEffect_.duration = duration;
-	fadeEffect_.elapsed = 0.0f;
-	fadeEffect_.colorTransition = true;
-
-	fadeEffect_.startColor = ColorRGBA::FromUInt(graph_.color);
-	fadeEffect_.targetColor = targetColor;
-	fadeEffect_.currentColor = fadeEffect_.startColor;
-}
-
-void DrawComponent2D::StopFade() {
-	fadeEffect_.isActive = false;
-	fadeEffect_.currentColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-}
-
-void DrawComponent2D::UpdateFade(float deltaTime) {
-	if (!fadeEffect_.isActive) {
-		return;
+	if (flipY_) {
+		std::swap(screenVertices[0], screenVertices[3]);
+		std::swap(screenVertices[1], screenVertices[2]);
 	}
 
-	fadeEffect_.elapsed += deltaTime;
-	float t = fadeEffect_.elapsed / fadeEffect_.duration;
+	// 最終的な色を取得
+	unsigned int finalColor = GetFinalColor();
 
-	if (t >= 1.0f) {
-		t = 1.0f;
-		fadeEffect_.currentColor = fadeEffect_.targetColor;
-		fadeEffect_.isActive = false;
-	}
-	else {
-		// 線形補間で色を変化
-		fadeEffect_.currentColor = ColorRGBA::Lerp(fadeEffect_.startColor, fadeEffect_.targetColor, t);
-	}
-}
-
-// ========== 拡大縮小効果 ==========
-void DrawComponent2D::StartScale(float minScale, float maxScale, float speed, int count) {
-	scaleEffect_.isActive = true;
-	scaleEffect_.minScale = minScale;
-	scaleEffect_.maxScale = maxScale;
-	scaleEffect_.speed = speed;
-	scaleEffect_.maxCount = count;
-	scaleEffect_.currentCount = 0;
-	scaleEffect_.continuous = false;
-	scaleEffect_.expanding = true;
-	scaleEffect_.currentScale = minScale;
-}
-
-/// <summary>
-/// 継続拡縮、StopScaleするまで継続
-/// </summary>
-/// <param name="minScale">最小の大きさ</param>
-/// <param name="maxScale">最大の大きさ</param>
-/// <param name="speed">拡縮のスピード 低いほど遅い 0.5くらいが標準くらい</param>
-void DrawComponent2D::StartScaleContinuous(float minScale, float maxScale, float speed) {
-	scaleEffect_.isActive = true;
-	scaleEffect_.minScale = minScale;
-	scaleEffect_.maxScale = maxScale;
-	scaleEffect_.speed = speed;
-	scaleEffect_.continuous = true;
-	scaleEffect_.expanding = true;
-	scaleEffect_.currentScale = minScale;
-}
-
-void DrawComponent2D::StopScale() {
-	scaleEffect_.isActive = false;
-	scaleEffect_.currentScale = 1.0f;
-}
-
-void DrawComponent2D::UpdateScale(float deltaTime) {
-	if (!scaleEffect_.isActive) {
-		return;
-	}
-
-	if (scaleEffect_.expanding) {
-		scaleEffect_.currentScale += scaleEffect_.speed * deltaTime;
-		if (scaleEffect_.currentScale >= scaleEffect_.maxScale) {
-			scaleEffect_.currentScale = scaleEffect_.maxScale;
-			scaleEffect_.expanding = false;
-		}
-	}
-	else {
-		scaleEffect_.currentScale -= scaleEffect_.speed * deltaTime;
-		if (scaleEffect_.currentScale <= scaleEffect_.minScale) {
-			scaleEffect_.currentScale = scaleEffect_.minScale;
-			scaleEffect_.expanding = true;
-
-			if (!scaleEffect_.continuous) {
-				scaleEffect_.currentCount++;
-				if (scaleEffect_.currentCount >= scaleEffect_.maxCount) {
-					StopScale();
-				}
-			}
-		}
-	}
-}
-
-// 縮小消滅エフェクトの実装
-void DrawComponent2D::StartScaleExtinction(float duration, int easingType, bool fadeWithScale) {
-	StartScaleExtinction(1.0f, duration, easingType, fadeWithScale);
-}
-
-void DrawComponent2D::StartScaleExtinction(float startScale, float duration, int easingType, bool fadeWithScale) {
-	scaleExtinctionEffect_.isActive = true;
-	scaleExtinctionEffect_.duration = duration;
-	scaleExtinctionEffect_.elapsed = 0.0f;
-	scaleExtinctionEffect_.startScale = startScale;
-	scaleExtinctionEffect_.endScale = 0.0f;
-	scaleExtinctionEffect_.easingType = easingType;
-	scaleExtinctionEffect_.fadeWithScale = fadeWithScale;
-	scaleExtinctionEffect_.currentScale = startScale;
-
-	// 開始色を保存
-	scaleExtinctionEffect_.startColor = ColorRGBA::FromUInt(GetEffectAppliedColor());
-
-	// スケールを初期化
-	scale_ = { startScale, startScale };
-}
-
-void DrawComponent2D::StopScaleExtinction() {
-	scaleExtinctionEffect_.isActive = false;
-	scaleExtinctionEffect_.elapsed = 0.0f;
-}
-
-void DrawComponent2D::UpdateScaleExtinction(float deltaTime) {
-	if (!scaleExtinctionEffect_.isActive) return;
-
-	scaleExtinctionEffect_.elapsed += deltaTime;
-
-	// 進行度を計算（0.0 ~ 1.0）
-	float t = scaleExtinctionEffect_.elapsed / scaleExtinctionEffect_.duration;
-	if (t > 1.0f) {
-		t = 1.0f;
-		// 完全に消滅したら非アクティブ化（後で削除できるように）
-	}
-
-	// イージングを適用
-	float easedT = ApplyEasing(t, scaleExtinctionEffect_.easingType);
-
-	// スケールを補間
-	scaleExtinctionEffect_.currentScale =
-		scaleExtinctionEffect_.startScale * (1.0f - easedT) +
-		scaleExtinctionEffect_.endScale * easedT;
-
-	// スケールを適用
-	scale_.x = scaleExtinctionEffect_.currentScale;
-	scale_.y = scaleExtinctionEffect_.currentScale;
-
-	// フェードも同時に行う場合
-	if (scaleExtinctionEffect_.fadeWithScale) {
-		ColorRGBA targetColor = scaleExtinctionEffect_.startColor;
-		targetColor.a = scaleExtinctionEffect_.startColor.a * (1.0f - easedT);
-
-		// FadeEffectを使わずに直接色を設定
-		graph_.color = targetColor.ToUInt();
-	}
-}
-
-// イージング関数
-float DrawComponent2D::ApplyEasing(float t, int easingType) const {
-	switch (easingType) {
-	case 0: // Linear
-		return t;
-
-	case 1: // EaseOut (減速)
-		return 1.0f - (1.0f - t) * (1.0f - t);
-
-	case 2: // EaseIn (加速)
-		return t * t;
-
-	case 3: // EaseInOut (加速→減速)
-		if (t < 0.5f) {
-			return 2.0f * t * t;
-		}
-		else {
-			float t2 = 1.0f - t;
-			return 1.0f - 2.0f * t2 * t2;
-		}
-
-	default:
-		return t;
-	}
-}
-
-// ========== エフェクトリセット ==========
-void DrawComponent2D::ResetAllEffects() {
-	StopShake();
-	StopRotation();
-	squashStretchEffect_.isActive = false;
-	StopFade();
-	StopScale();
-}
-
-// ========== エフェクト適用 ==========
-Vector2 DrawComponent2D::GetEffectAppliedPosition() const {
-	Vector2 pos = position_;
-	if (shakeEffect_.isActive) {
-		pos.x += shakeEffect_.offset.x;
-		pos.y += shakeEffect_.offset.y;
-	}
-	return pos;
-}
-
-Vector2 DrawComponent2D::GetEffectAppliedScale() const {
-	Vector2 scale = scale_;
-
-	if (squashStretchEffect_.isActive) {
-		float t = squashStretchEffect_.elapsed / squashStretchEffect_.duration;
-		if (squashStretchEffect_.expanding) {
-			scale.x *= 1.0f + (squashStretchEffect_.scale.x - 1.0f) * t;
-			scale.y *= 1.0f + (squashStretchEffect_.scale.y - 1.0f) * t;
-		}
-		else {
-			scale.x *= squashStretchEffect_.scale.x - (squashStretchEffect_.scale.x - 1.0f) * t;
-			scale.y *= squashStretchEffect_.scale.y - (squashStretchEffect_.scale.y - 1.0f) * t;
-		}
-	}
-
-	if (scaleEffect_.isActive) {
-		scale.x *= scaleEffect_.currentScale;
-		scale.y *= scaleEffect_.currentScale;
-	}
-
-	return scale;
-}
-
-float DrawComponent2D::GetEffectAppliedAngle() const {
-	float angle = angle_;
-	if (rotationEffect_.isActive) {
-		angle += rotationEffect_.accumulatedAngle;
-	}
-	return angle;
-}
-
-unsigned int DrawComponent2D::GetEffectAppliedColor() const {
-	unsigned int color = graph_.color;
-
-	if (fadeEffect_.isActive) {
-		// フェード効果が有効な場合、現在の補間色を使用
-		color = fadeEffect_.currentColor.ToUInt();
-	}
-
-	return color;
-}
-
-Matrix3x3 DrawComponent2D::GetEffectAppliedMatrix() const {
-	Vector2 effectPos = GetEffectAppliedPosition();
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	return AffineMatrix2D::MakeAffine(effectScale, effectAngle, effectPos);
-}
-
-// ========== 描画メソッド（既存） ==========
-void DrawComponent2D::DrawCamera(const Camera2D& camera) {
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Matrix3x3 wvpVpMatrix = Matrix3x3::Multiply(affineMatrix, camera.vpVpMatrix);
-	Vertex4 screenVertex = vertex_.Transform(vertex_.localVertex, wvpVpMatrix);
-	vertex_.DrawVertexQuad(screenVertex, graph_.handle, graph_.grDrawWidth, graph_.grDrawHeight, GetEffectAppliedColor());
-}
-
-void DrawComponent2D::DrawAnimationCamera(const Camera2D& camera) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		DrawCamera(camera);
-		return;
-	}
-
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Matrix3x3 wvpVpMatrix = Matrix3x3::Multiply(affineMatrix, camera.vpVpMatrix);
-	Vertex4 screenVertex = vertex_.Transform(vertex_.localVertex, wvpVpMatrix);
-
+	// 描画
 	Novice::DrawQuad(
-		static_cast<int>(screenVertex.leftTop.x), static_cast<int>(screenVertex.leftTop.y),
-		static_cast<int>(screenVertex.rightTop.x), static_cast<int>(screenVertex.rightTop.y),
-		static_cast<int>(screenVertex.leftBottom.x), static_cast<int>(screenVertex.leftBottom.y),
-		static_cast<int>(screenVertex.rightBottom.x), static_cast<int>(screenVertex.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
-}
-
-void DrawComponent2D::DrawQuadWorld() {
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Vertex4 localV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(localV.leftTop.x), static_cast<int>(localV.leftTop.y),
-		static_cast<int>(localV.rightTop.x), static_cast<int>(localV.rightTop.y),
-		static_cast<int>(localV.leftBottom.x), static_cast<int>(localV.leftBottom.y),
-		static_cast<int>(localV.rightBottom.x), static_cast<int>(localV.rightBottom.y),
-		0, 0,
-		graph_.grDrawWidth, graph_.grDrawHeight,
-		graph_.handle,
-		GetEffectAppliedColor()
-	);
-}
-
-void DrawComponent2D::DrawAnimationWorld() {
-	if (!animation_->IsPlaying()) {
-		DrawQuadWorld();
-		return;
-	}
-
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Vertex4 localV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(localV.leftTop.x), static_cast<int>(localV.leftTop.y),
-		static_cast<int>(localV.rightTop.x), static_cast<int>(localV.rightTop.y),
-		static_cast<int>(localV.leftBottom.x), static_cast<int>(localV.leftBottom.y),
-		static_cast<int>(localV.rightBottom.x), static_cast<int>(localV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
-}
-
-void DrawComponent2D::DrawAnimationScreen() {
-	if (!animation_->IsPlaying()) {
-		DrawQuadWorld();
-		return;
-	}
-
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Vertex4 screenV = vertex_.TransformScreen(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
-}
-
-void DrawComponent2D::DrawAnimationScreen(int grHandle) {
-	if (!animation_->IsPlaying()) {
-		DrawQuadWorld();
-		return;
-	}
-
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Vertex4 screenV = vertex_.TransformScreen(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		grHandle,
-		GetEffectAppliedColor()
-	);
-}
-
-void DrawComponent2D::DrawAnimationScreen(unsigned int color) {
-	if (!animation_->IsPlaying()) {
-		DrawQuadWorld();
-		return;
-	}
-
-	Matrix3x3 affineMatrix = GetEffectAppliedMatrix();
-	Vertex4 screenV = vertex_.TransformScreen(vertex_.localVertex, affineMatrix);
-
-	unsigned int effectColor = GetEffectAppliedColor();
-	// RGB成分は引数の色、アルファ成分はエフェクト適用
-	unsigned int finalColor = (color & 0x00FFFFFF) | (effectColor & 0xFF000000);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
+		static_cast<int>(screenVertices[0].x), static_cast<int>(screenVertices[0].y),
+		static_cast<int>(screenVertices[1].x), static_cast<int>(screenVertices[1].y),
+		static_cast<int>(screenVertices[3].x), static_cast<int>(screenVertices[3].y),
+		static_cast<int>(screenVertices[2].x), static_cast<int>(screenVertices[2].y),
+		srcX, srcY, srcW, srcH,
+		graphHandle_,
 		finalColor
 	);
 }
 
-void DrawComponent2D::DrawAnimationScreenWorldToScreen(const Vector2& offset) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		return;
-	}
+// ========== 内部処理 ==========
 
-	Vector2 effectPos = GetEffectAppliedPosition();
-	float screenX = effectPos.x - offset.x;
-	float screenY = kWindowHeight - (effectPos.y + height_ / 2.0f - offset.y);
-	Vector2 screenPosition = { screenX, screenY };
+Matrix3x3 DrawComponent2D::GetFinalTransformMatrix() const {
+	Vector2 finalPos = GetFinalPosition();
+	Vector2 finalScale = GetFinalScale();
+	float finalRotation = GetFinalRotation();
 
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, screenPosition);
-	Vertex4 screenV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
+	return AffineMatrix2D::MakeAffine(finalScale, finalRotation, finalPos);
 }
 
-void DrawComponent2D::DrawAnimationScreenWorldToScreen(const Vector2& offset, int grHandle) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		return;
-	}
-
-	Vector2 effectPos = GetEffectAppliedPosition();
-	float screenX = effectPos.x - offset.x;
-	float screenY = kWindowHeight - (effectPos.y + height_ / 2.0f - offset.y);
-	Vector2 screenPosition = { screenX, screenY };
-
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, screenPosition);
-	Vertex4 screenV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		grHandle,
-		GetEffectAppliedColor()
-	);
+Vector2 DrawComponent2D::GetFinalPosition() const {
+	Vector2 pos = position_;
+	Vector2 offset = effect_.GetPositionOffset();
+	return { pos.x + offset.x, pos.y + offset.y };
 }
 
-void DrawComponent2D::DrawAnimationScreenWorldToScreenReverse(const Vector2& offset) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		return;
-	}
-
-	Vector2 effectPos = GetEffectAppliedPosition();
-	float screenX = effectPos.x - offset.x;
-	float screenY = kWindowHeight - (effectPos.y + height_ / 2.0f - offset.y);
-	Vector2 screenPosition = { screenX, screenY };
-
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, screenPosition);
-	Vertex4 screenV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
+Vector2 DrawComponent2D::GetFinalScale() const {
+	Vector2 effectScale = effect_.GetScaleMultiplier();
+	return { scale_.x * effectScale.x, scale_.y * effectScale.y };
 }
 
-void DrawComponent2D::DrawAnimationScreenWorldToScreenReverse(const Vector2& offset, int grHandle) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		return;
-	}
-
-	Vector2 effectPos = GetEffectAppliedPosition();
-	float screenX = effectPos.x - offset.x;
-	float screenY = kWindowHeight - (effectPos.y + height_ / 2.0f - offset.y);
-	Vector2 screenPosition = { screenX, screenY };
-
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, screenPosition);
-	Vertex4 screenV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		grHandle,
-		GetEffectAppliedColor()
-	);
+float DrawComponent2D::GetFinalRotation() const {
+	return rotation_ + effect_.GetRotationOffset();
 }
 
-void DrawComponent2D::DrawAnimationScreenWorldToScreen(const Vector2& worldPosition, const Vector2& offset) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		return;
-	}
-
-	position_ = worldPosition;
-	Vector2 effectPos = GetEffectAppliedPosition();
-
-	float screenX = effectPos.x - offset.x;
-	float screenY = kWindowHeight - (effectPos.y + height_ / 2.0f - offset.y);
-	Vector2 screenPosition = { screenX, screenY };
-
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, screenPosition);
-	Vertex4 screenV = vertex_.Transform(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
+Vector2 DrawComponent2D::GetFinalDrawSize() const {
+	Vector2 finalScale = GetFinalScale();
+	return { drawSize_.x * finalScale.x, drawSize_.y * finalScale.y };
 }
 
-void DrawComponent2D::DrawAnimationScreen(const Vector2& offset) {
-	if (!animation_ || !animation_->IsPlaying()) {
-		DrawQuadWorld();
-		return;
-	}
-
-	Vector2 effectPos = GetEffectAppliedPosition();
-	Vector2 offsetPosition = Vector2::Add(effectPos, Vector2{ -offset.x, offset.y });
-
-	Vector2 effectScale = GetEffectAppliedScale();
-	float effectAngle = GetEffectAppliedAngle();
-
-	Matrix3x3 affineMatrix = AffineMatrix2D::MakeAffine(effectScale, effectAngle, offsetPosition);
-	Vertex4 screenV = vertex_.TransformScreen(vertex_.localVertex, affineMatrix);
-
-	Novice::DrawQuad(
-		static_cast<int>(screenV.leftTop.x), static_cast<int>(screenV.leftTop.y),
-		static_cast<int>(screenV.rightTop.x), static_cast<int>(screenV.rightTop.y),
-		static_cast<int>(screenV.leftBottom.x), static_cast<int>(screenV.leftBottom.y),
-		static_cast<int>(screenV.rightBottom.x), static_cast<int>(screenV.rightBottom.y),
-		animation_->GetSrcX(), animation_->GetSrcY(),
-		animation_->GetSrcW(), animation_->GetSrcH(),
-		animation_->GetGraphHandle(),
-		GetEffectAppliedColor()
-	);
+unsigned int DrawComponent2D::GetFinalColor() const {
+	return effect_.GetFinalColor(baseColor_);
 }
 
-// ========== アニメーション状態取得 ==========
-bool DrawComponent2D::HasAnimation() const {
-	return animation_ != nullptr;
+void DrawComponent2D::GetSourceRect(int& srcX, int& srcY, int& srcW, int& srcH) const {
+	if (animation_) {
+		srcX = animation_->GetSrcX();
+		srcY = animation_->GetSrcY();
+		srcW = animation_->GetSrcW();
+		srcH = animation_->GetSrcH();
+	}
+	else {
+		srcX = 0;
+		srcY = 0;
+		srcW = static_cast<int>(imageSize_.x);
+		srcH = static_cast<int>(imageSize_.y);
+	}
+}
+
+// ========== 画像設定 ==========
+
+void DrawComponent2D::SetGraphHandle(int handle) {
+	graphHandle_ = handle;
+	// 画像サイズを再計算
+	if (animation_) {
+		int divX = animation_->GetTotalFrames() > 0 ?
+			(animation_->GetTotalFrames() / animation_->GetFrameHeight()) : 1;
+		int divY = animation_->GetFrameHeight() > 0 ?
+			(animation_->GetFrameHeight() / animation_->GetFrameWidth()) : 1;
+		InitializeImageSize(divX, divY);
+	}
+}
+
+// ========== アニメーション制御 ==========
+
+void DrawComponent2D::PlayAnimation() {
+	if (animation_) animation_->Play();
+}
+
+void DrawComponent2D::StopAnimation() {
+	if (animation_) animation_->Stop();
+}
+
+void DrawComponent2D::PauseAnimation() {
+	if (animation_) animation_->Pause();
+}
+
+void DrawComponent2D::ResumeAnimation() {
+	if (animation_) animation_->Resume();
+}
+
+void DrawComponent2D::SetAnimationFrame(int frame) {
+	if (animation_) animation_->SetFrame(frame);
 }
 
 bool DrawComponent2D::IsAnimationPlaying() const {
-	return animation_->IsPlaying();
+	return animation_ ? animation_->IsPlaying() : false;
 }
 
-// Debug用 color関連
-void DrawComponent2D::DrawDebugWindow(const char* title) {
-	title;
+int DrawComponent2D::GetCurrentFrame() const {
+	return animation_ ? animation_->GetCurrentFrame() : 0;
+}
+
+int DrawComponent2D::GetTotalFrames() const {
+	return animation_ ? animation_->GetTotalFrames() : 1;
+}
+
+// ========== デバッグ ==========
 
 #ifdef _DEBUG
-	ImGui::Begin(title);
-	ImGui::Text("Position: (%.2f, %.2f)", position_.x, position_.y);
-	ImGui::Text("Scale: (%.2f, %.2f)", scale_.x, scale_.y);
-	ImGui::Text("Angle: %.2f", angle_);
-	ImGui::Text("Width: %.2f", width_);
-	ImGui::Text("Height: %.2f", height_);
-	ImGui::ColorEdit4("Graph Color", reinterpret_cast<float*>(&graph_.color));
+void DrawComponent2D::DrawDebugWindow(const char* windowName) {
+	ImGui::Begin(windowName);
 
-	ImGui::Text("R :%.2f", &fadeEffect_.currentColor.r);
-	ImGui::Text("G :%.2f", &fadeEffect_.currentColor.g);
-	ImGui::Text("B :%.2f", &fadeEffect_.currentColor.b);
-	ImGui::Text("A :%.2f", &fadeEffect_.currentColor.a);
+	ImGui::Text("=== Transform ===");
+	ImGui::DragFloat2("Position", &position_.x, 1.0f);
+	ImGui::DragFloat2("Scale", &scale_.x, 0.01f);
+	ImGui::SliderAngle("Rotation", &rotation_);
+	ImGui::DragFloat2("Anchor", &anchorPoint_.x, 0.01f, 0.0f, 1.0f);
+
+	ImGui::Text("=== Size ===");
+	ImGui::Text("Image Size: %.0f x %.0f", imageSize_.x, imageSize_.y);
+	ImGui::DragFloat2("Draw Size", &drawSize_.x, 1.0f);
+	if (ImGui::Button("Reset Draw Size")) {
+		ResetDrawSize();
+	}
+
+	ImGui::Text("=== Color ===");
+	ColorRGBA color = ColorRGBA::FromUInt(baseColor_);
+	float rgba[4] = { color.r, color.g, color.b, color.a };
+	if (ImGui::ColorEdit4("Base Color", rgba)) {
+		baseColor_ = ColorRGBA(rgba[0], rgba[1], rgba[2], rgba[3]).ToUInt();
+	}
+
+	ImGui::Text("=== Flip ===");
+	ImGui::Checkbox("Flip X", &flipX_);
+	ImGui::Checkbox("Flip Y", &flipY_);
+
+	ImGui::Text("=== Animation ===");
+	if (HasAnimation()) {
+		ImGui::Text("Frame: %d / %d", GetCurrentFrame(), GetTotalFrames());
+		ImGui::Text("Playing: %s", IsAnimationPlaying() ? "Yes" : "No");
+	}
+	else {
+		ImGui::Text("No Animation");
+	}
+
+	ImGui::Text("=== Effects ===");
+	ImGui::Text("Any Active: %s", IsAnyEffectActive() ? "Yes" : "No");
+	ImGui::Text("Shake: %s", IsShakeActive() ? "Active" : "Inactive");
+	ImGui::Text("Rotation: %s", IsRotationActive() ? "Active" : "Inactive");
+	ImGui::Text("Fade: %s", IsFadeActive() ? "Active" : "Inactive");
 
 	ImGui::End();
-#endif
 }
+#endif

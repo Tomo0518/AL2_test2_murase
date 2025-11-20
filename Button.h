@@ -3,99 +3,82 @@
 #include "DrawComponent2D.h"
 #include "FontAtlas.h"
 #include "TextRenderer.h"
-#include <functional>
 #include <string>
+#include <functional>
 
-/// <summary>
-/// 個別のボタンクラス
-/// </summary>
 class Button {
 public:
-	Button() = default;
+	Button(const Vector2& position, const Vector2& size,
+		const std::string& label, std::function<void()> callback);
 
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	/// <param name="position">ボタンの位置（中心座標）</param>
-	/// <param name="size">ボタンのサイズ</param>
-	/// <param name="label">ボタンに表示するテキスト</param>
-	/// <param name="callback">ボタンが押された時のコールバック関数</param>
-	Button(const Vector2& position, const Vector2& size, const std::string& label, std::function<void()> callback);
+	~Button(); // デストラクタを追加
 
-	/// <summary>
-	/// 更新処理
-	/// </summary>
-	/// <param name="deltaTime">デルタタイム</param>
-	/// <param name="isSelected">選択中かどうか</param>
+	// コピーコンストラクタ
+	Button(const Button& other);
+
+	// ムーブコンストラクタ
+	Button(Button&& other) noexcept;
+
+	// テクスチャを設定
+	void SetTexture(int textureHandle);
+
+	// 更新処理
 	void Update(float deltaTime, bool isSelected);
 
-	/// <summary>
-	/// 描画処理
-	/// </summary>
-	/// <param name="textureHandle">ボタンのテクスチャハンドル</param>
-	/// <param name="font">フォントアトラス</param>
-	/// <param name="textRenderer">テキストレンダラー</param>
+	// 描画処理
 	void Draw(int textureHandle, FontAtlas* font, TextRenderer* textRenderer) const;
 
-	/// <summary>
-	/// ボタンのアクションを実行
-	/// </summary>
+	// コールバック実行
 	void Execute();
 
-	// ゲッター
+	// 位置・サイズの設定
+	void SetPosition(const Vector2& position);
+	void SetSize(const Vector2& size);
 	Vector2 GetPosition() const { return position_; }
 	Vector2 GetSize() const { return size_; }
-	std::string GetLabel() const { return label_; }
-	bool IsSelected() const { return isSelected_; }
 
-	// セッター
-	void SetPosition(const Vector2& position) { position_ = position; }
-	void SetSize(const Vector2& size) { size_ = size; }
-	void SetLabel(const std::string& label) { label_ = label; }
-	void SetCallback(std::function<void()> callback) { callback_ = callback; }
-
-	// 色設定
+	// 見た目のカスタマイズ
 	void SetColorNormal(uint32_t color) { colorNormal_ = color; }
 	void SetColorSelected(uint32_t color) { colorSelected_ = color; }
-	void SetColorFrame(uint32_t color) { colorFrame_ = color; }
-	void SetColorFrameSelected(uint32_t color) { colorFrameSelected_ = color; }
-	void SetColorText(uint32_t color) { colorText_ = color; }
-	void SetColorTextSelected(uint32_t color) { colorTextSelected_ = color; }
-
-	// スケール設定
-	void SetScaleMin(float scale) { scaleMin_ = scale; }
-	void SetScaleMax(float scale) { scaleMax_ = scale; }
-	void SetEaseSpeed(float speed) { easeSpeed_ = speed; }
-
-	// アンカー設定
-	void SetAnchor(const Vector2& anchor) { anchor_ = anchor; }
+	void SetTextScale(float scale) { textScale_ = scale; }
 
 private:
-	Vector2 position_;              // ボタンの位置
-	Vector2 size_;                  // ボタンのサイズ
-	Vector2 anchor_ = { 0.5f, 0.5f }; // アンカー（デフォルトは中心）
-	std::string label_;             // ボタンのラベル
-	std::function<void()> callback_; // コールバック関数
+	// 描画コンポーネント
+	DrawComponent2D* drawComp_ = nullptr;
 
-	DrawComponent2D drawComp_;      // 描画コンポーネント
+	// 位置とサイズ
+	Vector2 position_ = { 0.0f, 0.0f };
+	Vector2 size_ = { 100.0f, 50.0f };
+	Vector2 anchor_ = { 0.5f, 0.5f };
 
-	bool isSelected_ = false;       // 選択中かどうか
-	float easeT_ = 0.0f;            // イージング用の時間パラメータ
+	// ラベルとコールバック
+	std::string label_;
+	std::function<void()> callback_;
 
 	// 色設定
-	uint32_t colorNormal_ = 0x582626FF;     // 通常時の色
-	uint32_t colorSelected_ = 0xEB8787FF;   // 選択時の色
-	uint32_t colorFrame_ = 0xB5B5B5FF;      // 枠線の色（通常）
-	uint32_t colorFrameSelected_ = 0xFFFFFFFF; // 枠線の色（選択時）
-	uint32_t colorText_ = 0x7E7E7EFF;       // テキストの色（通常）
-	uint32_t colorTextSelected_ = 0xFFFFFFFF; // テキストの色（選択時）
+	uint32_t colorNormal_ = 0x2A2A2AFF;         // 通常時の背景色
+	uint32_t colorSelected_ = 0xFFFFBBFF;       // 選択時の背景色
+	uint32_t colorFrame_ = 0xFFFFFFFF;          // 通常時の枠線色
+	uint32_t colorFrameSelected_ = 0xFFFFBBFF;  // 選択時の枠線色
+	uint32_t colorText_ = 0xCCCCCCFF;           // 通常時のテキスト色
+	uint32_t colorTextSelected_ = 0xFFFF55FF;   // 選択時のテキスト色
 
-	// スケール設定
-	float scaleMin_ = 1.0f;         // 最小スケール
-	float scaleMax_ = 1.18f;        // 最大スケール
-	float easeSpeed_ = 8.0f;        // イージング速度
+	// テキストスケール
+	float textScale_ = 1.5f;
+	float textScaleSelected_ = 1.53f;
 
-	// テキスト設定
-	float textScale_ = 1.0f;        // テキストのスケール
-	float textScaleSelected_ = 1.05f; // 選択時のテキストスケール
+	// スケールエフェクト
+	float scaleMin_ = 0.95f;
+	float scaleMax_ = 1.05f;
+
+	// イージング用
+	float easeSpeed_ = 8.0f;
+	float easeT_ = 0.0f;
+
+	// 選択状態
+	bool isSelected_ = false;
+
+	// 内部処理
+	void InitializeDrawComponent();
+	void UpdateDrawComponent();
 };

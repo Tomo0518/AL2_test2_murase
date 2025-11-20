@@ -14,7 +14,7 @@
 
 SceneManager::SceneManager() {
 	shared_.LoadCommonTextures();
-	ChangeScene(SceneType::Title);
+	ChangeScene(SceneType::GamePlay);
 }
 
 void SceneManager::Update(float dt, const char* keys, const char* pre) {
@@ -58,17 +58,6 @@ void SceneManager::RequestStageRestart() {
 	}
 }
 
-void SceneManager::RequestStageSelect() {
-	RequestTransition(SceneType::StageSelect);
-}
-
-void SceneManager::RequestGamePlayScene() {
-	RequestTransition(SceneType::GamePlay);
-}
-
-void SceneManager::RequestBackToTitle() {
-	RequestTransition(SceneType::Title);
-}
 
 void SceneManager::RequestPause() {
 	if (currentScene_) {
@@ -79,11 +68,6 @@ void SceneManager::RequestPause() {
 
 void SceneManager::RequestPauseResume() {
 	PopOverlay();
-}
-
-void SceneManager::RequestPauseReturnToStageSelect() {
-	PopOverlay(); // ポーズを閉じる
-	RequestStageSelect();
 }
 
 void SceneManager::RequestOpenSettings() {

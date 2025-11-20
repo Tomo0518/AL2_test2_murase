@@ -12,7 +12,7 @@
 #endif
 
 TitleScene::TitleScene(SceneManager& manager, GameShared& shared)
-	:manager_(manager),
+	: manager_(manager),
 	shared_(shared) {
 
 	// フォント読み込み
@@ -21,78 +21,43 @@ TitleScene::TitleScene(SceneManager& manager, GameShared& shared)
 		fontReady_ = true;
 	}
 
+	// 描画コンポーネントを初期化
+	InitializeDrawComponents();
+
 	// ボタン初期化
 	InitializeButtons();
 
-	InitializeDrawComponents();
-
+	// BGMを再生
 	shared_.PlayExclusive_(BgmKind::Title);
 }
 
 void TitleScene::InitializeDrawComponents() {
-	// 背景テクスチャ
-	grHandleBackground_ = Novice::LoadTexture("./Resources/images/title/background_ver1.png");
-	// ロゴテクスチャ
-	grHandleLogo_ = Novice::LoadTexture("./Resources/images/title/logo_ver1.png");
-	int logoWidth = 0;
-	int logoHeight = 0;
+	// ========== 背景 ==========
+	int bgTexture = Novice::LoadTexture("./Resources/images/title/background_ver1.png");
+	drawCompBackground_ = DrawComponent2D(bgTexture);
 
-	Novice::GetTextureSize(grHandleLogo_, &logoWidth, &logoHeight);
+	// 背景の設定
+	drawCompBackground_.SetPosition({ kWindowWidth / 2.0f, kWindowHeight / 2.0f });
+	drawCompBackground_.SetDrawSize(1280.0f, 720.0f);
+	drawCompBackground_.SetAnchorPoint({ 0.5f, 0.5f });
 
-	drawCompBackground_ = DrawComponent2D(
-		{ kWindowWidth / 2.0f, kWindowHeight / 2.0f }, // 描画する中心座標
-		1280.0f, 720.0f, // スクリーンに表示する横、縦幅
-		Novice::LoadTexture("./Resources/images/title/background_ver1.png"), // グラフィックハンドル
-		1280, 720,  // 画像の1フレームの横幅、縦幅
-		1,		    // フレーム数
-		1,			// 一行の分割数(基本フレーム数と同じでいい)
-		0.3f,		// アニメーションの再生速度
-		true		// ループ再生するかどうか
-	);
+	// ========== ロゴ ==========
+	int logoTexture = Novice::LoadTexture("./Resources/images/title/logo_ver1.png");
+	drawCompLogo_ = DrawComponent2D(logoTexture);
 
-	drawCompLogo_ = DrawComponent2D(
-		{ kWindowWidth / 2.0f,  kWindowHeight / 2.0f }, // 描画する中心座標
-		(float)logoWidth, (float)logoHeight, // スクリーンに表示する横、縦幅
-		grHandleLogo_, // グラフィックハンドル
-		logoWidth, logoHeight,  // 画像の1フレームの横幅、縦幅
-		1,		    // フレーム数
-		1,			// 一行の分割数(基本フレーム数と同じでいい)
-		0.3f,		// アニメーションの再生速度
-		true		// ループ再生するかどうか
-	);
+	// ロゴの設定
+	drawCompLogo_.SetPosition({ kWindowWidth / 2.0f, kWindowHeight / 2.0f });
+	drawCompLogo_.SetAnchorPoint({ 0.5f, 0.5f });
 
-	drawCompBackground_.StopAnimation();
-	drawCompBackground_.PlayAnimation();
+	// ロゴにパルスエフェクトを追加（拡大縮小）
+	drawCompLogo_.StartPulse(0.9f, 1.1f, 0.5f, true);
 
-	// ロゴ拡大縮小アニメーション開始
-	drawCompLogo_.StopAnimation();
-	drawCompLogo_.PlayAnimation();
-
-	drawCompLogo_.StartScaleContinuous(0.9f, 1.1f, 0.5f);
-}
-
-void TitleScene::Update(float dt, const char* keys, const char* pre) {
-	UpdateDrawComponents(dt);
-	buttonManager_.Update(dt, keys, pre, shared_.pad);
-}
-
-void TitleScene::Draw() {
-
-	// 背景描画
-	drawCompBackground_.DrawAnimationScreen();
-
-	// ロゴ描画
-	drawCompLogo_.DrawAnimationScreen();
-
-	buttonManager_.Draw(
-		grHandleButton_,
-		&font_,
-		&text_
-	);
+	// テクスチャハンドルを保存（デバッグ用）
+	grHandleBackground_ = bgTexture;
+	grHandleLogo_ = logoTexture;
 }
 
 void TitleScene::InitializeButtons() {
-
 	// ボタン用の白いテクスチャ
 	grHandleButton_ = shared_.texWhite;
 
@@ -102,8 +67,9 @@ void TitleScene::InitializeButtons() {
 	const float buttonSpacing = 80.0f;
 	const Vector2 buttonSize = { 270.0f, 60.0f };
 
+	// ボタンのコールバック
 	auto goToStageSelect = [&]() {
-		manager_.RequestStageSelect();
+		manager_.RequestTransition(SceneType::StageSelect);
 		};
 
 	auto goToSettings = [&]() {
@@ -115,21 +81,24 @@ void TitleScene::InitializeButtons() {
 		};
 
 	// 3つのボタンを追加
-	buttonManager_.AddButton({ centerX,startY }, buttonSize, "Play", goToStageSelect);
-
+	buttonManager_.AddButton({ centerX, startY }, buttonSize, "Play", goToStageSelect);
 	buttonManager_.AddButton(
 		Vector2{ centerX, startY + buttonSpacing },
 		buttonSize,
 		"SETTING",
 		goToSettings
 	);
-
 	buttonManager_.AddButton(
 		Vector2{ centerX, startY + buttonSpacing * 2 },
 		buttonSize,
 		"QUIT",
 		quitGame
 	);
+
+	// 各ボタンにテクスチャを設定
+	for (size_t i = 0; i < buttonManager_.GetButtonCount(); ++i) {
+		buttonManager_.SetButtonTexture(grHandleButton_);
+	}
 
 	// SE設定
 	buttonManager_.SetOnSelectSound([&]() {
@@ -142,10 +111,70 @@ void TitleScene::InitializeButtons() {
 
 	// 初期選択をリセット
 	buttonManager_.SetFirstFrame(true);
+
 }
 
-void TitleScene::UpdateDrawComponents(float dt) {
-	drawCompBackground_.UpdateAnimation(dt);
-	drawCompLogo_.UpdateAnimation(dt);
-	drawCompLogo_.UpdateEffects(dt);
+void TitleScene::UpdateDrawComponents(float deltaTime) {
+	// 新しい DrawComponent2D の Update() を使用
+	drawCompBackground_.Update(deltaTime);
+	drawCompLogo_.Update(deltaTime);
+}
+
+void TitleScene::Update(float dt, const char* keys, const char* pre) {
+	// 描画コンポーネントを更新
+	UpdateDrawComponents(dt);
+
+	// ボタンマネージャーを更新
+	buttonManager_.Update(dt, keys, pre, shared_.pad);
+}
+
+void TitleScene::Draw() {
+	// 背景描画（スクリーン座標）
+	drawCompBackground_.DrawScreen();
+
+	// ロゴ描画（スクリーン座標、パルスエフェクト付き）
+	drawCompLogo_.DrawScreen();
+
+	// ボタン描画
+	buttonManager_.Draw(
+		grHandleButton_,
+		&font_,
+		&text_
+	);
+
+#ifdef _DEBUG
+	// デバッグ情報
+	ImGui::Begin("Title Scene Debug");
+
+	ImGui::Text("=== Background ===");
+	Vector2 bgPos = drawCompBackground_.GetPosition();
+	Vector2 bgSize = drawCompBackground_.GetDrawSize();
+	ImGui::Text("Position: (%.1f, %.1f)", bgPos.x, bgPos.y);
+	ImGui::Text("Draw Size: (%.1f, %.1f)", bgSize.x, bgSize.y);
+
+	ImGui::Separator();
+
+	ImGui::Text("=== Logo ===");
+	Vector2 logoPos = drawCompLogo_.GetPosition();
+	Vector2 logoSize = drawCompLogo_.GetDrawSize();
+	Vector2 logoImageSize = drawCompLogo_.GetImageSize();
+	ImGui::Text("Position: (%.1f, %.1f)", logoPos.x, logoPos.y);
+	ImGui::Text("Image Size: (%.1f, %.1f)", logoImageSize.x, logoImageSize.y);
+	ImGui::Text("Draw Size: (%.1f, %.1f)", logoSize.x, logoSize.y);
+	ImGui::Text("Scale Effect Active: %s",
+		drawCompLogo_.IsScaleEffectActive() ? "Yes" : "No");
+
+	ImGui::Separator();
+
+	if (ImGui::Button("Reset Logo Pulse")) {
+		drawCompLogo_.StopScale();
+		drawCompLogo_.StartPulse(0.9f, 1.1f, 0.5f, true);
+	}
+
+	if (ImGui::Button("Stop All Effects")) {
+		drawCompLogo_.StopAllEffects();
+	}
+
+	ImGui::End();
+#endif
 }

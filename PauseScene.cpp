@@ -68,39 +68,16 @@ void PauseScene::UpdateButtonVisual() {
 }
 
 void PauseScene::Update(float deltaTime, const char* keys, const char* pre) {
-
-	// 入力モード判定
-	bool keyboardInput = false;
-	bool padInput = false;
-
-	// キーボード入力判定（A/D/SPACE/RETURN/ESC/Bなど）
-	for (int k : { DIK_W, DIK_S, DIK_A, DIK_D, DIK_SPACE, DIK_RETURN, DIK_ESCAPE, DIK_B }) {
-		if (pre[k] == 0 && keys[k]) {
-			keyboardInput = true;
-			break;
-		}
-	}
-
-	// パッド入力判定（スティック or ボタン）
-	if (std::abs(shared_.pad.LeftX()) > 0.2f || std::abs(shared_.pad.LeftY()) > 0.2f) {
-		padInput = true;
-	}
-	for (int b = 0; b < static_cast<int>(Pad::Button::COUNT); ++b) {
-		if (shared_.pad.Trigger(static_cast<Pad::Button>(b))) {
-			padInput = true;
-			break;
-		}
-	}
-
-
+	deltaTime; // 未使用
+	// 入力ロック中は処理しない
 	if (inputLockTimer_ > 0) {
 		inputLockTimer_--;
+		// ボタンのアニメーション更新だけ実行
+		for (auto& b : buttons_) {
+			b.Update();
+		}
 		return;
 	}
-
-	shared_.pad.Update();
-
-	deltaTime = deltaTime;
 
 	if (firstFrame_) {
 		prevLY_ = shared_.pad.LeftY();
@@ -130,11 +107,9 @@ void PauseScene::Update(float deltaTime, const char* keys, const char* pre) {
 	float ly = shared_.pad.LeftY();
 	const float threshold = 0.5f;
 
-	// 上方向（スティックを上に倒す = Y軸+方向）
 	bool padUp = (prevLY_ <= threshold && ly > threshold) ||
 		shared_.pad.Trigger(Pad::Button::DPadUp);
 
-	// 下方向（スティックを下に倒す = Y軸-方向）
 	bool padDown = (prevLY_ >= -threshold && ly < -threshold) ||
 		shared_.pad.Trigger(Pad::Button::DPadDown);
 
@@ -150,7 +125,6 @@ void PauseScene::Update(float deltaTime, const char* keys, const char* pre) {
 		UpdateButtonVisual();
 	}
 
-	// 前フレームのスティック値を更新
 	prevLY_ = ly;
 
 	// ========================================
@@ -172,7 +146,7 @@ void PauseScene::Update(float deltaTime, const char* keys, const char* pre) {
 				manager_.RequestStageRestart();
 			}
 			else {
-				manager_.RequestStageSelect();
+				manager_.RequestTransition(SceneType::StageSelect);
 			}
 			return;
 		}
@@ -181,7 +155,7 @@ void PauseScene::Update(float deltaTime, const char* keys, const char* pre) {
 			return;
 		case 3: // セレクトに戻る
 			shared_.PlayExclusive_(BgmKind::Title);
-			manager_.RequestPauseReturnToStageSelect();
+			manager_.RequestTransition(SceneType::StageSelect);
 			return;
 		}
 	}

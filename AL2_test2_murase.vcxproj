@@ -127,6 +127,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="Matrix3x3.cpp" />
     <ClCompile Include="Pad.cpp" />
     <ClCompile Include="PauseScene.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="ResultScene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SettingScene.cpp" />
@@ -186,6 +187,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="Matrix3x3.h" />
     <ClInclude Include="Pad.h" />
     <ClInclude Include="PauseScene.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Random.h" />
     <ClInclude Include="ResultScene.h" />
     <ClInclude Include="SceneManager.h" />

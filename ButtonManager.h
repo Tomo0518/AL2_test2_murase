@@ -56,6 +56,8 @@ public:
 	// セッター
 	void SetSelectedIndex(int index);
 
+	void SetButtonTexture(int textureHandle);
+
 	// ループ設定
 	void SetLoopNavigation(bool loop) { loopNavigation_ = loop; }
 	bool IsLoopNavigation() const { return loopNavigation_; }

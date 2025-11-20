@@ -2,18 +2,22 @@
 #include <memory>
 #include "GameSceneBase.h"
 #include "GameShared.h"
-#include "Background.h"
+#include "DrawComponent2D.h"
+#include "Camera2D.h"
 
 class SceneManager;
 
 /// <summary>
 /// ステージシーンの基底クラス
-/// シーン遷移入力と背景描画のみ
+/// 新しい DrawComponent2D と Camera2D システムに対応
+/// - 背景描画
+/// - カメラ管理
+/// - 共通の更新処理
 /// </summary>
 class BaseStageScene : public GameSceneBase {
 public:
 	BaseStageScene(SceneManager& manager, GameShared& shared, int stageIndex);
-	virtual ~BaseStageScene() = default;
+	virtual ~BaseStageScene();
 
 	int GetStageIndex() const override { return stageIndex_; }
 
@@ -42,18 +46,30 @@ protected:
 	/// </summary>
 	virtual void DrawStage() {}
 
-
 	// ========================================
-	// メンバ変数
+	// 共通メンバ変数（派生クラスからアクセス可能）
 	// ========================================
 
-	int stageIndex_ = 0;             // ステージ番号
-	GameShared& shared_;             // 共有リソース
 	SceneManager& manager_;          // シーンマネージャー
-	// 初期化フラグ
-	bool initialized_ = false;
+	GameShared& shared_;             // 共有リソース
+	int stageIndex_ = 0;             // ステージ番号
+	bool initialized_ = false;       // 初期化フラグ
+
+	// カメラ（派生クラスで使用可能）
+	Camera2D* camera_ = nullptr;
 
 private:
-	int grHandleBackground_ = -1; // 背景テクスチャハンドル
-	DrawComponent2D drawCompBackground_; // 背景描画コンポーネント
+	// ========================================
+	// 内部処理
+	// ========================================
+
+	void InitializeBackground();
+	void InitializeCamera();
+	void UpdateBackground(float deltaTime);
+
+	// ========================================
+	// 描画コンポーネント
+	// ========================================
+
+	DrawComponent2D* drawCompBackground_ = nullptr;  // 背景
 };

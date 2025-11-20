@@ -6,12 +6,18 @@
 #include "FontAtlas.h"
 #include "TextRenderer.h"
 #include "ButtonManager.h"
+#include "DrawComponent2D.h"
+#include "WindowSize.h"
 
 class SceneManager;
 
+/// <summary>
+/// ステージセレクトシーン
+/// </summary>
 class StageSelectScene : public GameSceneBase {
 public:
 	StageSelectScene(SceneManager& manager, GameShared& shared);
+	~StageSelectScene();
 
 	void Update(float dt, const char* keys, const char* pre) override;
 	void Draw() override;
@@ -20,31 +26,24 @@ private:
 	SceneManager& manager_;
 	GameShared& shared_;
 
-	// ボタンマネージャー
+	// ========== ボタン管理 ==========
 	ButtonManager buttonManager_;
-	void InitializeButtons(); // ボタン初期化
+	void InitializeButtons();
 
-	// フォント
+	// ========== フォント ==========
 	FontAtlas font_;
 	TextRenderer text_;
 	bool fontReady_ = false;
 
-	//=========================
-	// 描画類
-	//=========================
-	// grHandleやコンポーネントの初期化
+	// ========== 描画コンポーネント ==========
 	void InitializeDrawComponents();
 	void UpdateDrawComponents(float deltaTime);
 
-	// ボタン用テクスチャ
 	int grHandleButton_ = -1;
+	DrawComponent2D* drawCompBackground_ = nullptr;
 
-	// 背景テクスチャ
-	int grHandleBackground_ = -1;
-	DrawComponent2D drawCompBackground_;
-
-	// 入力受付の遅延タイマー
-	int inputDelayTimer_ = 0;
-	const int kInputDelayFrames_ = 30;  // フレーム数ベースの遅延
+	// ========== 入力制御 ==========
+	float inputDelayTimer_ = 0.0f;
+	const float kInputDelay_ = 0.5f;  // 秒単位の遅延
 	bool inputEnabled_ = false;
 };

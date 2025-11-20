@@ -18,6 +18,8 @@ public:
 	void Update(float deltaTime, const char* keys, const char* preKeys) override;
 	void Draw() override;
 
+	void SetButtonTexture(int textureHandle) { grHandleButton_ = textureHandle; }
+
 private:
 	SceneManager& manager_;
 	GameShared& shared_;

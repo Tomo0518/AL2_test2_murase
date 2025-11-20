@@ -197,6 +197,9 @@
     <ClCompile Include="Explanation.cpp">
       <Filter>KamataEngine\Source\Game\Scene\Explanation</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>KamataEngine\Source\Game\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -381,6 +384,9 @@
     </ClInclude>
     <ClInclude Include="Explanation.h">
       <Filter>KamataEngine\Source\Game\Scene\Explanation</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>KamataEngine\Source\Game\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
