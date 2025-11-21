@@ -2,12 +2,6 @@
 #include "Vector2.h"
 #include "DrawComponent2D.h"
 
-// パーティクルの挙動タイプ（更新ロジックの切り替え用）
-enum class ParticleType {
-	Physics,    // 物理挙動（速度・重力・回転）
-	Stationary, // その場に留まる（アニメーションのみなど）
-	Ghost       // 残像（徐々に透明になる）
-};
 
 class Particle {
 public:
