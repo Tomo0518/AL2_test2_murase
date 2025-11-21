@@ -110,6 +110,9 @@
     <Filter Include="KamataEngine\Source\Shared">
       <UniqueIdentifier>{5faa254f-c393-4f48-ba8a-971af779a6d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KamataEngine\Source\library\json">
+      <UniqueIdentifier>{5fb55ef0-75a1-4869-bb7c-84f0b9f104f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -401,6 +404,15 @@
       <Filter>KamataEngine\Source\library\2D\Particle</Filter>
     </ClInclude>
     <ClInclude Include="ParticleManager.h">
+      <Filter>KamataEngine\Source\library\2D\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>KamataEngine\Source\library\json</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtil.h">
+      <Filter>KamataEngine\Source\library\json</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEnum.h">
       <Filter>KamataEngine\Source\library\2D\Particle</Filter>
     </ClInclude>
   </ItemGroup>

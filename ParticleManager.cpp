@@ -2,6 +2,15 @@
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
+#include "JsonUtil.h"
+#include "json.hpp"
+
+// nlohmann/json の警告を抑制
+#pragma warning(push)
+#pragma warning(disable: 26495)  // 未初期化変数警告
+#pragma warning(disable: 26819)  // switch フォールスルー警告
+#include "json.hpp"
+#pragma warning(pop)
 
 #ifdef _DEBUG
 #include <imgui.h>
@@ -15,15 +24,51 @@
 #undef max
 #endif
 
+using nlohmann::json;
+
 // 度数法 -> ラジアン変換
 static const float kDeg2Rad = 3.14159265f / 180.0f;
+// デフォルトのパラメータファイルパス
+static const std::string kDefaultParamPath = "Resources/Data/particle_params.json";
 
 ParticleManager::ParticleManager() {
-	LoadParams();
+	LoadCommonResources();  // 先にテクスチャをロード
+
+	// JSONからパラメータを読み込み（ファイルがなければデフォルトで作成）
+	if (!LoadParamsFromJson(kDefaultParamPath)) {
+		// 読み込み失敗時はデフォルトパラメータを設定して保存
+		LoadParams();
+		SaveParamsToJson(kDefaultParamPath);
+	}
+}
+
+// ブレンドモード変換ヘルパー
+const char* ParticleManager::BlendModeToString(BlendMode mode) {
+	switch (mode) {
+	case kBlendModeNone: return "None";
+	case kBlendModeNormal: return "Normal";
+	case kBlendModeAdd: return "Add";
+	case kBlendModeSubtract: return "Subtract";
+	case kBlendModeMultiply: return "Multiply";
+	case kBlendModeScreen: return "Screen";
+	case kBlendModeExclusion: return "Exclusion";
+	default: return "Normal";
+	}
+}
+
+BlendMode ParticleManager::StringToBlendMode(const std::string& str) {
+	if (str == "None") return kBlendModeNone;
+	if (str == "Normal") return kBlendModeNormal;
+	if (str == "Add") return kBlendModeAdd;
+	if (str == "Subtract") return kBlendModeSubtract;
+	if (str == "Multiply") return kBlendModeMultiply;
+	if (str == "Screen") return kBlendModeScreen;
+	if (str == "Exclusion") return kBlendModeExclusion;
+	return kBlendModeNormal;
 }
 
 void ParticleManager::LoadParams() {
-	// 1. 爆発（全方位に広がるアニメーション）
+	// 1. 爆発（加算ブレンドで明るく光る）
 	ParticleParam explosion;
 	explosion.count = 1;
 	explosion.lifeMin = 40;
@@ -44,9 +89,10 @@ void ParticleManager::LoadParams() {
 	explosion.divY = 1;
 	explosion.totalFrames = 4;
 	explosion.animSpeed = 0.05f;
+	explosion.blendMode = kBlendModeAdd;  // 加算ブレンド
 	params_[ParticleType::Explosion] = explosion;
 
-	// 2. デブリ（岩の破片が飛び散る）
+	// 2. デブリ（通常ブレンド）
 	ParticleParam debris;
 	debris.count = 10;
 	debris.lifeMin = 40;
@@ -56,7 +102,7 @@ void ParticleManager::LoadParams() {
 	debris.angleBase = 0.0f;
 	debris.angleRange = 360.0f;
 	debris.gravity = { 0.0f, -800.0f };
-	debris.sizeMin = 12.0f;    // 破片は小さめ
+	debris.sizeMin = 12.0f;
 	debris.sizeMax = 24.0f;
 	debris.scaleStart = 1.0f;
 	debris.scaleEnd = 0.3f;
@@ -67,9 +113,10 @@ void ParticleManager::LoadParams() {
 	debris.divY = 1;
 	debris.totalFrames = 1;
 	debris.animSpeed = 0.0f;
+	debris.blendMode = kBlendModeNormal;  // 通常ブレンド
 	params_[ParticleType::Debris] = debris;
 
-	// 3. ヒットエフェクト（破片が多方面に飛び散る）
+	// 3. ヒットエフェクト（加算ブレンド）
 	ParticleParam hit;
 	hit.count = 18;
 	hit.lifeMin = 15;
@@ -79,7 +126,7 @@ void ParticleManager::LoadParams() {
 	hit.angleBase = 90.0f;
 	hit.angleRange = 1550.0f;
 	hit.gravity = { 0.0f, -300.0f };
-	hit.sizeMin = 27.0f;       // ヒット破片は小さめ
+	hit.sizeMin = 27.0f;
 	hit.sizeMax = 43.0f;
 	hit.scaleStart = 0.8f;
 	hit.scaleEnd = 0.2f;
@@ -90,9 +137,10 @@ void ParticleManager::LoadParams() {
 	hit.divY = 1;
 	hit.totalFrames = 1;
 	hit.animSpeed = 0.0f;
+	hit.blendMode = kBlendModeAdd;  // 加算ブレンド
 	params_[ParticleType::Hit] = hit;
 
-	// 4. 土煙
+	// 4. 土煙（通常ブレンド）
 	ParticleParam dust;
 	dust.count = 8;
 	dust.lifeMin = 30;
@@ -102,7 +150,7 @@ void ParticleManager::LoadParams() {
 	dust.angleBase = -90.0f;
 	dust.angleRange = 60.0f;
 	dust.gravity = { 0.0f, -50.0f };
-	dust.sizeMin = 32.0f;     // 土煙は大きめ
+	dust.sizeMin = 32.0f;
 	dust.sizeMax = 64.0f;
 	dust.scaleStart = 0.5f;
 	dust.scaleEnd = 1.5f;
@@ -113,9 +161,10 @@ void ParticleManager::LoadParams() {
 	dust.divY = 1;
 	dust.totalFrames = 1;
 	dust.animSpeed = 0.0f;
+	dust.blendMode = kBlendModeNormal;  // 通常ブレンド
 	params_[ParticleType::Dust] = dust;
 
-	// 5. マズルフラッシュ
+	// 5. マズルフラッシュ（加算ブレンド）
 	ParticleParam muzzle;
 	muzzle.count = 1;
 	muzzle.lifeMin = 8;
@@ -136,6 +185,7 @@ void ParticleManager::LoadParams() {
 	muzzle.divY = 1;
 	muzzle.totalFrames = 1;
 	muzzle.animSpeed = 0.0f;
+	muzzle.blendMode = kBlendModeAdd;  // 加算ブレンド
 	params_[ParticleType::MuzzleFlash] = muzzle;
 }
 
@@ -148,11 +198,21 @@ void ParticleManager::Update(float deltaTime) {
 }
 
 void ParticleManager::Draw(const Camera2D& camera) {
-	for (auto& p : particles_) {
-		if (p.IsAlive()) {
-			p.Draw(camera);
+	// パーティクルタイプごとにグループ化して描画
+	for (const auto& [type, param] : params_) {
+		// このタイプのブレンドモードを設定
+		Novice::SetBlendMode(param.blendMode);
+
+		// このタイプのパーティクルを描画
+		for (auto& p : particles_) {
+			if (p.IsAlive() && p.GetType() == type) {
+				p.Draw(camera);
+			}
 		}
 	}
+
+	// デフォルトに戻す
+	Novice::SetBlendMode(kBlendModeNormal);
 }
 
 void ParticleManager::Emit(ParticleType type, const Vector2& pos) {
@@ -176,7 +236,11 @@ void ParticleManager::Emit(ParticleType type, const Vector2& pos) {
 
 	// 設定された個数ぶん発生させる
 	for (int i = 0; i < param.count; ++i) {
+
 		Particle& p = GetNextParticle();
+
+		// パーティクルタイプを設定
+		p.SetType(type);
 
 		// --- ランダム計算 ---
 		int life = static_cast<int>(RandomFloat(static_cast<float>(param.lifeMin), static_cast<float>(param.lifeMax)));
@@ -263,7 +327,7 @@ void ParticleManager::LoadCommonResources() {
 	// テクスチャを一括ロード
 	texExplosion_ = Novice::LoadTexture("./Resources/images/effect/explosion.png");
 	texDebris_ = Novice::LoadTexture("./Resources/images/effect/debris.png");
-	texHit_ = Novice::LoadTexture("./Resources/images/effect/hit_ver1.png");
+	texHit_ = Novice::LoadTexture("./Resources/images/effect/hit.png");
 	texDust_ = Novice::LoadTexture("./Resources/images/effect/hit_ver1.png");
 
 #ifdef _DEBUG
@@ -296,6 +360,45 @@ float ParticleManager::RandomFloat(float min, float max) {
 void ParticleManager::DrawDebugWindow() {
 #ifdef _DEBUG
 	ImGui::Begin("Particle Manager", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+	// ========== ファイル操作 ==========
+	ImGui::Text("=== File Operations ===");
+
+	static char filepath[256] = "Resources/Data/particle_params.json";
+	ImGui::InputText("File Path", filepath, sizeof(filepath));
+
+	ImGui::BeginGroup();
+	if (ImGui::Button("Save Parameters", ImVec2(140, 30))) {
+		if (SaveParamsToJson(filepath)) {
+			Novice::ConsolePrintf("Successfully saved to: %s\n", filepath);
+		}
+		else {
+			Novice::ConsolePrintf("Failed to save to: %s\n", filepath);
+		}
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Load Parameters", ImVec2(140, 30))) {
+		if (LoadParamsFromJson(filepath)) {
+			Novice::ConsolePrintf("Successfully loaded from: %s\n", filepath);
+		}
+		else {
+			Novice::ConsolePrintf("Failed to load from: %s\n", filepath);
+		}
+	}
+	ImGui::EndGroup();
+
+	ImGui::SameLine();
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		ImGui::Text("Save: Export current parameters to JSON file");
+		ImGui::Text("Load: Import parameters from JSON file");
+		ImGui::EndTooltip();
+	}
+
+	ImGui::Separator();
 
 	// ========== エフェクトタイプ選択 ==========
 	ImGui::Text("=== Effect Type ===");
@@ -357,6 +460,52 @@ void ParticleManager::DrawDebugWindow() {
 
 	ImGui::Separator();
 
+	ImGui::Separator();
+
+	// ========== エフェクトタイプ選択 ==========
+	ImGui::Text("=== Effect Type ===");
+	const char* effectItems[] = { "Explosion", "Debris", "Hit", "Dust", "MuzzleFlash" };
+	/*int currentEffectItem = static_cast<int>(currentDebugType_);*/
+	if (ImGui::Combo("Type", &currentItem, items, IM_ARRAYSIZE(items))) {
+		currentDebugType_ = static_cast<ParticleType>(currentItem);
+	}
+
+
+	ImGui::Separator();
+
+	// ========== ブレンドモード設定 ==========
+	ImGui::TreeNode("Blend Mode Settings");
+	ImGui::Text("=== Blend Mode ===");
+	const char* blendModes[] = {
+		"None",
+		"Normal (Alpha)",
+		"Add (Additive)",
+		"Subtract",
+		"Multiply",
+		"Screen",
+		"Exclusion"
+	};
+
+	int currentBlendMode = static_cast<int>(p.blendMode);
+	if (ImGui::Combo("Blend Mode", &currentBlendMode, blendModes, IM_ARRAYSIZE(blendModes))) {
+		p.blendMode = static_cast<BlendMode>(currentBlendMode);
+	}
+
+	ImGui::SameLine();
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		ImGui::Text("Normal: Standard alpha blending");
+		ImGui::Text("Add: Bright, glowing effect");
+		ImGui::Text("Subtract: Dark, shadow effect");
+		ImGui::Text("Multiply: Darker blending");
+		ImGui::Text("Screen: Bright, soft blending");
+		ImGui::EndTooltip();
+	}
+
+	ImGui::Separator();
+	ImGui::TreePop();
+
 	// ========== 見た目設定 ==========
 	ImGui::Text("=== Appearance ===");
 
@@ -400,10 +549,186 @@ void ParticleManager::DrawDebugWindow() {
 		Emit(currentDebugType_, { 640.0f, 360.0f });
 	}
 
-	if (ImGui::Button("Reset to Default")) {
+	if (ImGui::Button("Reset to Default", ImVec2(200, 30))) {
 		LoadParams();
+		Novice::ConsolePrintf("Parameters reset to default values\n");
 	}
 
 	ImGui::End();
 #endif
+}
+
+
+// ============================================
+// JSON入出力関連
+// ============================================
+
+// ========== JSONシリアライズ ==========
+json ParticleManager::SerializeParams() const {
+	json root = json::object();
+
+	for (const auto& [type, param] : params_) {
+		std::string typeName;
+		switch (type) {
+		case ParticleType::Explosion: typeName = "Explosion"; break;
+		case ParticleType::Debris: typeName = "Debris"; break;
+		case ParticleType::Hit: typeName = "Hit"; break;
+		case ParticleType::Dust: typeName = "Dust"; break;
+		case ParticleType::MuzzleFlash: typeName = "MuzzleFlash"; break;
+		default: typeName = "Unknown"; break;
+		}
+
+		nlohmann::json paramJson;
+		paramJson["count"] = param.count;
+		paramJson["textureHandle"] = param.textureHandle;
+		paramJson["lifeMin"] = param.lifeMin;
+		paramJson["lifeMax"] = param.lifeMax;
+		paramJson["speedMin"] = param.speedMin;
+		paramJson["speedMax"] = param.speedMax;
+		paramJson["angleBase"] = param.angleBase;
+		paramJson["angleRange"] = param.angleRange;
+		paramJson["gravity"] = {
+			{"x", param.gravity.x},
+			{"y", param.gravity.y}
+		};
+		paramJson["sizeMin"] = param.sizeMin;
+		paramJson["sizeMax"] = param.sizeMax;
+		paramJson["scaleStart"] = param.scaleStart;
+		paramJson["scaleEnd"] = param.scaleEnd;
+		paramJson["colorStart"] = param.colorStart;
+		paramJson["colorEnd"] = param.colorEnd;
+		paramJson["useAnimation"] = param.useAnimation;
+		paramJson["divX"] = param.divX;
+		paramJson["divY"] = param.divY;
+		paramJson["totalFrames"] = param.totalFrames;
+		paramJson["animSpeed"] = param.animSpeed;
+		paramJson["blendMode"] = BlendModeToString(param.blendMode);  // ブレンドモード
+
+		root[typeName] = paramJson;
+	}
+
+	return root;
+}
+
+bool ParticleManager::DeserializeParams(const nlohmann::json& j) {
+	try {
+		params_.clear();
+
+		std::map<std::string, ParticleType> typeMap = {
+			{"Explosion", ParticleType::Explosion},
+			{"Debris", ParticleType::Debris},
+			{"Hit", ParticleType::Hit},
+			{"Dust", ParticleType::Dust},
+			{"MuzzleFlash", ParticleType::MuzzleFlash}
+		};
+
+		for (const auto& [typeName, type] : typeMap) {
+			if (j.contains(typeName)) {
+				const nlohmann::json& paramJson = j[typeName];
+				ParticleParam param;
+
+				param.count = JsonUtil::GetValue<int>(paramJson, "count", 1);
+				param.textureHandle = JsonUtil::GetValue<int>(paramJson, "textureHandle", -1);
+				param.lifeMin = JsonUtil::GetValue<int>(paramJson, "lifeMin", 30);
+				param.lifeMax = JsonUtil::GetValue<int>(paramJson, "lifeMax", 60);
+				param.speedMin = JsonUtil::GetValue<float>(paramJson, "speedMin", 100.0f);
+				param.speedMax = JsonUtil::GetValue<float>(paramJson, "speedMax", 200.0f);
+				param.angleBase = JsonUtil::GetValue<float>(paramJson, "angleBase", 0.0f);
+				param.angleRange = JsonUtil::GetValue<float>(paramJson, "angleRange", 360.0f);
+
+				if (paramJson.contains("gravity")) {
+					param.gravity.x = JsonUtil::GetValue<float>(paramJson["gravity"], "x", 0.0f);
+					param.gravity.y = JsonUtil::GetValue<float>(paramJson["gravity"], "y", 0.0f);
+				}
+
+				param.sizeMin = JsonUtil::GetValue<float>(paramJson, "sizeMin", 16.0f);
+				param.sizeMax = JsonUtil::GetValue<float>(paramJson, "sizeMax", 32.0f);
+				param.scaleStart = JsonUtil::GetValue<float>(paramJson, "scaleStart", 1.0f);
+				param.scaleEnd = JsonUtil::GetValue<float>(paramJson, "scaleEnd", 0.0f);
+				param.colorStart = JsonUtil::GetValue<unsigned int>(paramJson, "colorStart", 0xFFFFFFFF);
+				param.colorEnd = JsonUtil::GetValue<unsigned int>(paramJson, "colorEnd", 0xFFFFFF00);
+				param.useAnimation = JsonUtil::GetValue<bool>(paramJson, "useAnimation", false);
+				param.divX = JsonUtil::GetValue<int>(paramJson, "divX", 1);
+				param.divY = JsonUtil::GetValue<int>(paramJson, "divY", 1);
+				param.totalFrames = JsonUtil::GetValue<int>(paramJson, "totalFrames", 1);
+				param.animSpeed = JsonUtil::GetValue<float>(paramJson, "animSpeed", 0.1f);
+
+				// ブレンドモード読み込み
+				std::string blendModeStr = JsonUtil::GetValue<std::string>(paramJson, "blendMode", "Normal");
+				param.blendMode = StringToBlendMode(blendModeStr);
+
+				// テクスチャハンドル復元
+				if (param.textureHandle == -1) {
+					switch (type) {
+					case ParticleType::Explosion: param.textureHandle = texExplosion_; break;
+					case ParticleType::Debris: param.textureHandle = texDebris_; break;
+					case ParticleType::Hit: param.textureHandle = texHit_; break;
+					case ParticleType::Dust: param.textureHandle = texDust_; break;
+					case ParticleType::MuzzleFlash: param.textureHandle = texExplosion_; break;
+					}
+				}
+
+				params_[type] = param;
+			}
+		}
+
+		return true;
+	}
+	catch (const std::exception& e) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("ParticleManager: Failed to deserialize params: %s\n", e.what());
+#endif
+		return false;
+	}
+}
+
+// ========== JSON 保存/読み込み ==========
+bool ParticleManager::SaveParamsToJson(const std::string& filepath) {
+	try {
+		nlohmann::json j = SerializeParams();
+
+		if (JsonUtil::SaveToFile(filepath, j, 4)) {
+#ifdef _DEBUG
+			Novice::ConsolePrintf("ParticleManager: Parameters saved to %s\n", filepath.c_str());
+#endif
+			return true;
+		}
+
+		return false;
+	}
+	catch (const std::exception& e) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("ParticleManager: Failed to save params: %s\n", e.what());
+#endif
+		return false;
+	}
+}
+
+bool ParticleManager::LoadParamsFromJson(const std::string& filepath) {
+	nlohmann::json j;
+
+	// ファイルが存在しない場合はデフォルトパラメータで新規作成
+	if (!JsonUtil::LoadFromFile(filepath, j)) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("ParticleManager: JSON file not found. Creating default parameters...\n");
+#endif
+		// デフォルトパラメータを設定
+		LoadParams();
+		// 新規作成して保存
+		return SaveParamsToJson(filepath);
+	}
+
+	// JSONからパラメータを読み込み
+	if (DeserializeParams(j)) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("ParticleManager: Parameters loaded from %s\n", filepath.c_str());
+#endif
+		return true;
+	}
+
+#ifdef _DEBUG
+	Novice::ConsolePrintf("ParticleManager: Failed to load parameters. Using defaults.\n");
+#endif
+	LoadParams();
+	return false;
 }

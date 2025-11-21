@@ -49,7 +49,7 @@ void GamePlayScene::InitializeBackground() {
 	// 九マスの3x3で背景を構成
 	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_0.png")));
 	background_[0]->SetPosition({ -1280.0f, 720.0f });
-	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_1.png")));
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background_black.png")));
 	background_[1]->SetPosition({ 0.0f, 720.0f });
 	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_2.png")));
 	background_[2]->SetPosition({ 1280.0f, 720.0f });

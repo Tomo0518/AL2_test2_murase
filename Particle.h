@@ -1,16 +1,7 @@
 ﻿#pragma once
 #include "Vector2.h"
 #include "DrawComponent2D.h"
-
-/// <summary>
-/// パーティクルの「挙動」の種類
-/// マネージャー側で「爆発」などの種類を選んだ際、内部的にこれが設定される
-/// </summary>
-enum class ParticleBehavior {
-	Physics,    // 物理挙動（速度・重力・回転あり：デブリなど）
-	Stationary, // その場に留まる（アニメーションのみ：爆発など）
-	Ghost       // 残像（動きなし、その場でフェードアウト：ダッシュ残像）
-};
+#include "ParticleEnum.h"
 
 class Particle {
 public:
@@ -36,7 +27,13 @@ public:
 	// 挙動タイプ設定
 	void SetBehavior(ParticleBehavior behavior) { behavior_ = behavior; }
 
+	void SetType(ParticleType type) { type_ = type; }
+	ParticleType GetType() const { return type_; }
+
+
 private:
+	ParticleType type_ = ParticleType::Explosion;
+
 	// 描画・演出コンポーネント
 	DrawComponent2D* drawComp_ = nullptr;
 
