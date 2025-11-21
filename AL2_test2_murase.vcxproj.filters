@@ -101,11 +101,14 @@
     <Filter Include="KamataEngine\Source\Game\DebugWindow">
       <UniqueIdentifier>{76e4a89a-1ebb-4d50-8a50-eed30bb1b8ed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KamataEngine\Source\library\Effect">
-      <UniqueIdentifier>{3c214814-9fc5-485b-93fa-667b00dab85b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="KamataEngine\Source\Game\Scene\Explanation">
       <UniqueIdentifier>{307b3917-f9d9-403a-a3e5-08c9d164d6ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KamataEngine\Source\library\2D\Particle">
+      <UniqueIdentifier>{a6f8e870-45b6-4068-a2f1-ab24ce3be498}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KamataEngine\Source\library\2D\Effect">
+      <UniqueIdentifier>{3c214814-9fc5-485b-93fa-667b00dab85b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -192,13 +195,19 @@
       <Filter>KamataEngine\Source\Game\DebugWindow</Filter>
     </ClCompile>
     <ClCompile Include="Effect.cpp">
-      <Filter>KamataEngine\Source\library\Effect</Filter>
+      <Filter>KamataEngine\Source\library\2D\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Explanation.cpp">
       <Filter>KamataEngine\Source\Game\Scene\Explanation</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>KamataEngine\Source\Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <Filter>KamataEngine\Source\library\2D\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>KamataEngine\Source\library\2D\Particle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -380,13 +389,19 @@
       <Filter>KamataEngine\Source\Game\DebugWindow</Filter>
     </ClInclude>
     <ClInclude Include="Effect.h">
-      <Filter>KamataEngine\Source\library\Effect</Filter>
+      <Filter>KamataEngine\Source\library\2D\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Explanation.h">
       <Filter>KamataEngine\Source\Game\Scene\Explanation</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>KamataEngine\Source\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>KamataEngine\Source\library\2D\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleManager.h">
+      <Filter>KamataEngine\Source\library\2D\Particle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

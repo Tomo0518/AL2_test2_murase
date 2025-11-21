@@ -12,10 +12,7 @@
 #endif
 
 /// <summary>
-/// 新・DrawComponent2D
-/// - 責務の分離: 状態管理と描画を明確に分ける
-/// - カプセル化: private メンバ + Setter/Getter
-/// - Effect クラスへの委譲
+/// DrawComponent2D
 /// </summary>
 class DrawComponent2D {
 public:
@@ -214,6 +211,12 @@ public:
 	bool IsRotationActive() const { return effect_.IsRotationActive(); }
 	bool IsFadeActive() const { return effect_.IsFadeActive(); }
 	bool IsScaleEffectActive() const { return effect_.IsScaleActive(); }
+
+	/// <summary>
+	/// 内容を再設定する（パーティクルの再利用などで使用）
+	/// </summary>
+	void Setup(int graphHandle, int divX = 1, int divY = 1, int totalFrames = 1, float speed = 0.0f, bool isLoop = false);
+
 
 	// ========== デバッグ ==========
 

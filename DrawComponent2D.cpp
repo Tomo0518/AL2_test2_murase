@@ -334,6 +334,33 @@ int DrawComponent2D::GetTotalFrames() const {
 	return animation_ ? animation_->GetTotalFrames() : 1;
 }
 
+// ========== 再設定用メソッド ==========
+void DrawComponent2D::Setup(int graphHandle, int divX, int divY, int totalFrames, float speed, bool isLoop) {
+	graphHandle_ = graphHandle;
+
+	// 画像サイズ再計算
+	InitializeImageSize(divX, divY);
+
+	// アニメーションを再作成（リセット）
+	int frameWidth = static_cast<int>(imageSize_.x);
+	int frameHeight = static_cast<int>(imageSize_.y);
+
+	// 古いアニメーションがあれば破棄して作り直す
+	animation_ = std::make_unique<Animation>(
+		graphHandle, frameWidth, frameHeight, totalFrames, divX, speed, isLoop
+	);
+	animation_->Play();
+
+	// エフェクトなどはリセットしておく
+	StopAllEffects();
+
+	// 描画サイズなども初期化
+	drawSize_ = imageSize_;
+	scale_ = { 1.0f, 1.0f };
+	rotation_ = 0.0f;
+	baseColor_ = 0xFFFFFFFF;
+}
+
 // ========== デバッグ ==========
 
 #ifdef _DEBUG
