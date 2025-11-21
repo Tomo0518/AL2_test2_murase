@@ -262,7 +262,7 @@ void Effect::UpdateSquash(float deltaTime) {
 
 // ========== 複合エフェクト ==========
 void Effect::StartHitEffect() {
-	StartFlash(ColorRGBA::White(), 0.1f, 0.8f);
+	StartFlash(ColorRGBA::Red(), 0.1f, 0.8f);
 	StartShake(5.0f, 0.2f);
 }
 

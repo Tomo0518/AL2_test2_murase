@@ -32,7 +32,7 @@ private:
 	// ========== ゲームオブジェクト ==========
 	std::unique_ptr<Camera2D> camera_;
 	std::unique_ptr<Player> player_;
-	std::unique_ptr<Background> background_;
+	std::vector<std::unique_ptr<Background>> background_;
 
 	// ========== デバッグ ==========
 	std::unique_ptr<DebugWindow> debugWindow_;

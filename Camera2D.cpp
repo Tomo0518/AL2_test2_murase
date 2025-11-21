@@ -6,11 +6,12 @@
 #include <Novice.h>
 
 // ========== コンストラクタ ==========
-Camera2D::Camera2D(const Vector2& position, const Vector2& size)
+Camera2D::Camera2D(const Vector2& position, const Vector2& size, bool invertY)
 	: position_(position)
 	, size_(size)
 	, zoom_(1.0f)
-	, rotation_(0.0f) {
+	, rotation_(0.0f)
+	, invertY_(invertY) {
 
 	UpdateMatrices();
 }
@@ -239,6 +240,7 @@ void Camera2D::ApplyBounds() {
 }
 
 // ========== 行列計算 ==========
+// ========== 行列計算 ==========
 void Camera2D::UpdateMatrices() {
 	// シェイクオフセットを適用した位置
 	Vector2 finalPosition = position_;
@@ -252,16 +254,17 @@ void Camera2D::UpdateMatrices() {
 	Matrix3x3 cameraAffine = AffineMatrix2D::MakeAffine(scale, rotation_, finalPosition);
 	viewMatrix_ = Matrix3x3::Inverse(cameraAffine);
 
-	// 射影行列（正射影）を作成
+	// 射影行列（正射影）を作成 - Y軸反転オプションあり
 	float halfWidth = size_.x * 0.5f;
 	float halfHeight = size_.y * 0.5f;
+	float yScale = invertY_ ? -1.0f : 1.0f;  // Y軸反転フラグに応じて変更
 
 	projectionMatrix_.m[0][0] = 1.0f / halfWidth;
 	projectionMatrix_.m[0][1] = 0.0f;
 	projectionMatrix_.m[0][2] = 0.0f;
 
 	projectionMatrix_.m[1][0] = 0.0f;
-	projectionMatrix_.m[1][1] = 1.0f / halfHeight;
+	projectionMatrix_.m[1][1] = yScale / halfHeight;
 	projectionMatrix_.m[1][2] = 0.0f;
 
 	projectionMatrix_.m[2][0] = 0.0f;
@@ -309,42 +312,61 @@ void Camera2D::DebugMove(bool isDebug, const char* keys, const char* pre) {
 
 	// ========== 移動 ==========
 	// 矢印キーで移動
-	if (keys[DIK_UP]) {
-		position_.y -= moveSpeed * (1.0f / 60.0f);  // 仮に60FPS想定
+	if (IsInvertY()) {
+		if (keys[DIK_UP]) {
+			position_.y += moveSpeed * (1.0f / 60.0f);  // 仮に60FPS想定
+		}
+		if (keys[DIK_DOWN]) {
+			position_.y -= moveSpeed * (1.0f / 60.0f);
+		}
+		if (keys[DIK_LEFT]) {
+			position_.x -= moveSpeed * (1.0f / 60.0f);
+		}
+		if (keys[DIK_RIGHT]) {
+			position_.x += moveSpeed * (1.0f / 60.0f);
+		}
 	}
-	if (keys[DIK_DOWN]) {
-		position_.y += moveSpeed * (1.0f / 60.0f);
+	else {
+		if (keys[DIK_UP]) {
+			position_.y -= moveSpeed * (1.0f / 60.0f);  // 仮に60FPS想定
+		}
+		if (keys[DIK_DOWN]) {
+			position_.y += moveSpeed * (1.0f / 60.0f);
+		}
+		if (keys[DIK_LEFT]) {
+			position_.x -= moveSpeed * (1.0f / 60.0f);
+		}
+		if (keys[DIK_RIGHT]) {
+			position_.x += moveSpeed * (1.0f / 60.0f);
+		}
 	}
-	if (keys[DIK_LEFT]) {
-		position_.x -= moveSpeed * (1.0f / 60.0f);
-	}
-	if (keys[DIK_RIGHT]) {
-		position_.x += moveSpeed * (1.0f / 60.0f);
-	}
+
 
 	// ========== ズーム ==========
 	// PageUp/PageDown でズーム
-	if (keys[DIK_PRIOR]) {  // PageUp
+	if (keys[DIK_E]) {  // PageUp
 		zoom_ += zoomSpeed * (1.0f / 60.0f);
 		zoom_ = std::clamp(zoom_, 0.1f, 10.0f);
 	}
-	if (keys[DIK_NEXT]) {  // PageDown
+	if (keys[DIK_Q]) {  // PageDown
 		zoom_ -= zoomSpeed * (1.0f / 60.0f);
 		zoom_ = std::clamp(zoom_, 0.1f, 10.0f);
 	}
 
+
+
 	// ========== 回転 ==========
 	// Q/E で回転
-	if (keys[DIK_Q]) {
+	if (keys[DIK_R]) {
 		rotation_ -= rotationSpeed * (1.0f / 60.0f);
 	}
-	if (keys[DIK_E]) {
+	if (keys[DIK_T]) {
 		rotation_ += rotationSpeed * (1.0f / 60.0f);
 	}
 
 	// ========== リセット ==========
 	// Rキーでカメラリセット
-	if (keys[DIK_R] && !pre[DIK_R]) {
+	if (keys[DIK_F] && !pre[DIK_F]) {
 		position_ = { 640.0f, 360.0f };
 		zoom_ = 1.0f;
 		rotation_ = 0.0f;

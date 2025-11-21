@@ -10,9 +10,18 @@ class DebugWindow; // 前方宣言
 class Camera2D {
 	friend class DebugWindow;
 public:
-	// コンストラクタ: 位置とサイズで初期化
+
+	// コンストラクタ: 位置とサイズで初期化、Y軸反転オプション
+
+	/// <summary>
+	/// カメラのコンストラクタ
+	/// </summary>
+	/// <param name="position">初期位置</param>
+	/// <param name="size">描画したい範囲(基本的にWindowSize)</param>
+	/// <param name="invertY">描画のY軸を反転させるか(スクリーン:false,ワールド(上が+):true)</param>
 	Camera2D(const Vector2& position = { 640, 360 },
-		const Vector2& size = { 1280.0f, 720.0f });
+		const Vector2& size = { 1280.0f, 720.0f },
+		bool invertY = false);
 
 	// 更新（deltaTime対応でスムーズに）
 	void Update(float deltaTime);
@@ -50,7 +59,10 @@ public:
 
 	// === 行列取得 ===
 	Matrix3x3 GetVpVpMatrix() const;
-	
+
+	// === Y軸反転取得 ===
+	bool IsInvertY() const { return invertY_; }
+
 	// デバッグ用
 	bool GetIsDebugCamera() { return isDebugCamera_; }
 
@@ -60,6 +72,7 @@ private:
 	Vector2 size_;
 	float zoom_;
 	float rotation_;
+	bool invertY_;  // Y軸反転フラグ
 
 	bool isDebugCamera_ = false;
 

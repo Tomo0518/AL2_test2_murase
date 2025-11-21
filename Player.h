@@ -21,7 +21,7 @@ public:
 	~Player();
 
 	// ========== 更新・描画 ==========
-	void Update(float deltaTime, const char* keys, const char* pre);
+	void Update(float deltaTime, const char* keys, const char* pre, bool isDebugMode);
 	void Draw(const Camera2D& camera);
 	void DrawScreen();  // UI用（カメラなし）
 
@@ -48,7 +48,7 @@ private:
 	Vector2 position_ = { 640.0f, 360.0f };
 	Vector2 velocity_ = { 0.0f, 0.0f };
 	float radius_ = 32.0f;
-	float moveSpeed_ = 200.0f;
+	float moveSpeed_ = 400.0f;
 	bool isAlive_ = true;
 
 	// ========== 描画コンポーネント ==========

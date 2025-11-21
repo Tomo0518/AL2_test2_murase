@@ -32,7 +32,8 @@ void GamePlayScene::Initialize() {
 }
 
 void GamePlayScene::InitializeCamera() {
-	camera_ = std::make_unique<Camera2D>(Vector2{ 640.0f, 360.0f }, Vector2{ 1280.0f, 720.0f });
+	bool isWorldYUp = true; // 上に行けばYが+ならtreu
+	camera_ = std::make_unique<Camera2D>(Vector2{ 640.0f, 360.0f }, Vector2{ 1280.0f, 720.0f }, isWorldYUp);
 	camera_->SetFollowSpeed(0.1f);
 	camera_->SetDeadZone(150.0f, 100.0f);
 	camera_->SetBounds(0.0f, 720.0f, 1280.0f, 0.0f);
@@ -44,7 +45,26 @@ void GamePlayScene::InitializePlayer() {
 }
 
 void GamePlayScene::InitializeBackground() {
-	background_ = std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background_ver1.png"));
+	// 九マスの3x3で背景を構成
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_0.png")));
+	background_[0]->SetPosition({ -1280.0f, 720.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_1.png")));
+	background_[1]->SetPosition({ 0.0f, 720.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background0_2.png")));
+	background_[2]->SetPosition({ 1280.0f, 720.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background1_0.png")));
+	background_[3]->SetPosition({ -1280.0f, 0.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background1_1.png")));
+	background_[4]->SetPosition({ 0.0f, 0.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background1_2.png")));
+	background_[5]->SetPosition({ 1280.0f, 0.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background2_0.png")));
+	background_[6]->SetPosition({ -1280.0f, -720.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background2_1.png")));
+	background_[7]->SetPosition({ 0.0f, -720.0f });
+	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background2_2.png")));
+	background_[8]->SetPosition({ 1280.0f, -720.0f });
+
 }
 
 void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
@@ -82,7 +102,7 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 
 	// プレイヤーを更新
 	if (player_) {
-		player_->Update(dt, keys, pre);
+		player_->Update(dt, keys, pre, camera_->GetIsDebugCamera());
 	}
 
 	// カメラを更新
@@ -93,7 +113,9 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 
 void GamePlayScene::Draw() {
 	// 背景を描画
-	background_->Draw(*camera_);
+	for (auto& background : background_) {
+		background->Draw(*camera_);
+	}
 
 	// プレイヤーを描画（カメラ使用）
 	if (player_ && camera_) {

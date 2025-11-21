@@ -150,10 +150,23 @@ void DrawComponent2D::Update(float deltaTime) {
 }
 
 // ========== 描画 ==========
-
 void DrawComponent2D::Draw(const Camera2D& camera) {
 	Matrix3x3 vpMatrix = camera.GetVpVpMatrix();
-	DrawInternal(&vpMatrix);
+
+	// カメラのY軸反転設定を確認してスケールを調整
+	if (camera.IsInvertY()) {
+		// Y軸反転が有効な場合、スケールのY成分を反転
+		Vector2 originalScale = scale_;
+		scale_.y *= -1.0f;
+
+		DrawInternal(&vpMatrix);
+
+		// スケールを元に戻す
+		scale_ = originalScale;
+	}
+	else {
+		DrawInternal(&vpMatrix);
+	}
 }
 
 void DrawComponent2D::DrawWorld() {
@@ -179,8 +192,6 @@ void DrawComponent2D::DrawInternal(const Matrix3x3* vpMatrix) {
 
 	// 頂点座標を計算
 	Vector2 localVertices[4];
-	/*float halfW = drawSize_.x * 0.5f;
-	float halfH = drawSize_.y * 0.5f;*/
 
 	// アンカーポイントを考慮したローカル座標
 	float anchorOffsetX = drawSize_.x * anchorPoint_.x;

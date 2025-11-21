@@ -78,6 +78,13 @@ public:
 	/// </summary>
 	void DrawScreen();
 
+
+	/// <summary>
+	/// Y軸反転描画
+	/// </summary>
+	void DrawInternal(const Matrix3x3* vpMatrix);
+
+
 	// ========== 位置・変形設定 ==========
 
 	void SetPosition(const Vector2& pos) { position_ = pos; }
@@ -272,8 +279,4 @@ private:
 	/// </summary>
 	void GetSourceRect(int& srcX, int& srcY, int& srcW, int& srcH) const;
 
-	/// <summary>
-	/// 実際の描画処理（共通部分）
-	/// </summary>
-	void DrawInternal(const Matrix3x3* vpMatrix);
 };

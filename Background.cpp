@@ -38,10 +38,10 @@ void Background::Update(float deltaTime) {
 void Background::Draw(const Camera2D& camera) {
 	if (!drawComp_) return;
 
-	// カリングチェック
-	if (cullingEnabled_ && !IsVisible(camera)) {
-		return;
-	}
+	//// カリングチェック
+	//if (cullingEnabled_ && !IsVisible(camera)) {
+	//	return;
+	//}
 
 	// カメラを使って描画
 	drawComp_->Draw(camera);

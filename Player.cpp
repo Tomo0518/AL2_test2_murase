@@ -25,14 +25,17 @@ void Player::Move(float deltaTime, const char* keys) {
 
 	// WASD で移動
 	if (keys[DIK_W]) {
-		velocity_.y = -moveSpeed_;
-	}
-	if (keys[DIK_S]) {
 		velocity_.y = moveSpeed_;
 	}
+
+	if (keys[DIK_S]) {
+		velocity_.y = -moveSpeed_;
+	}
+
 	if (keys[DIK_A]) {
 		velocity_.x = -moveSpeed_;
 	}
+
 	if (keys[DIK_D]) {
 		velocity_.x = moveSpeed_;
 	}
@@ -55,7 +58,7 @@ void Player::Move(float deltaTime, const char* keys) {
 	//position_.y = std::clamp(position_.y, 32.0f, 720.0f - 32.0f);
 }
 
-void Player::Update(float deltaTime, const char* keys, const char* pre) {
+void Player::Update(float deltaTime, const char* keys, const char* pre, bool isDebugMode) {
 	if (!isAlive_) return;
 
 	// 移動処理
@@ -63,60 +66,68 @@ void Player::Update(float deltaTime, const char* keys, const char* pre) {
 
 	// ========== エフェクトテスト用のキー入力 ==========
 
-	// Q: シェイクエフェクト
-	if (keys[DIK_Q] && !pre[DIK_Q]) {
-		drawComp_->StartShake(10.0f, 0.3f);
+	if (!isDebugMode) {
+		// Q: シェイクエフェクト
+		if (keys[DIK_Q] && !pre[DIK_Q]) {
+			drawComp_->StartShake(10.0f, 0.3f);
+		}
+
+		// E: 回転エフェクト
+		if (keys[DIK_R] && !pre[DIK_R]) {
+			if (drawComp_->IsRotationActive()) {
+				drawComp_->StopRotation();
+			}
+			else {
+				drawComp_->StartRotationContinuous(3.0f);
+			}
+		}
+
+		// T: パルス（拡大縮小）
+		if (keys[DIK_E] && !pre[DIK_E]) {
+			if (drawComp_->IsScaleEffectActive()) {
+				drawComp_->StopScale();
+			}
+			else {
+				drawComp_->StartPulse(0.8f, 1.2f, 3.0f, true);
+			}
+		}
+
+		// Y: フラッシュ（白）
+		if (keys[DIK_Y] && !pre[DIK_Y]) {
+			drawComp_->StartFlash(ColorRGBA::White(), 0.2f, 0.8f);
+		}
+
+		// U: ヒットエフェクト（複合）
+		if (keys[DIK_U] && !pre[DIK_U]) {
+			drawComp_->StartHitEffect();
+		}
+
+		// I: 色変更（赤）
+		if (keys[DIK_I] && !pre[DIK_I]) {
+			drawComp_->StartColorTransition(ColorRGBA::Red(), 0.5f);
+		}
+
+		// O: 色リセット（白）
+		if (keys[DIK_O] && !pre[DIK_O]) {
+			drawComp_->StartColorTransition(ColorRGBA::White(), 0.5f);
+		}
+
+		// P: フェードアウト
+		if (keys[DIK_P] && !pre[DIK_P]) {
+			drawComp_->StartFadeOut(1.0f);
+		}
+
+		// L: フェードイン
+		if (keys[DIK_L] && !pre[DIK_L]) {
+			drawComp_->StartFadeIn(0.5f);
+		}
+
+		// F: 全エフェクトリセット
+		if (keys[DIK_F] && !pre[DIK_F]) {
+			drawComp_->StopAllEffects();
+		}
 	}
 
-	// E: 回転エフェクト
-	if (keys[DIK_E] && !pre[DIK_E]) {
-		drawComp_->StartRotationContinuous(3.0f);
-	}
-
-	// R: 回転停止
-	if (keys[DIK_R] && !pre[DIK_R]) {
-		drawComp_->StopRotation();
-	}
-
-	// T: パルス（拡大縮小）
-	if (keys[DIK_T] && !pre[DIK_T]) {
-		drawComp_->StartPulse(0.8f, 1.2f, 3.0f, true);
-	}
-
-	// Y: フラッシュ（白）
-	if (keys[DIK_Y] && !pre[DIK_Y]) {
-		drawComp_->StartFlash(ColorRGBA::White(), 0.2f, 0.8f);
-	}
-
-	// U: ヒットエフェクト（複合）
-	if (keys[DIK_U] && !pre[DIK_U]) {
-		drawComp_->StartHitEffect();
-	}
-
-	// I: 色変更（赤）
-	if (keys[DIK_I] && !pre[DIK_I]) {
-		drawComp_->StartColorTransition(ColorRGBA::Red(), 0.5f);
-	}
-
-	// O: 色リセット（白）
-	if (keys[DIK_O] && !pre[DIK_O]) {
-		drawComp_->StartColorTransition(ColorRGBA::White(), 0.5f);
-	}
-
-	// P: フェードアウト
-	if (keys[DIK_P] && !pre[DIK_P]) {
-		drawComp_->StartFadeOut(1.0f);
-	}
-
-	// L: フェードイン
-	if (keys[DIK_L] && !pre[DIK_L]) {
-		drawComp_->StartFadeIn(0.5f);
-	}
-
-	// F: 全エフェクトリセット
-	if (keys[DIK_F] && !pre[DIK_F]) {
-		drawComp_->StopAllEffects();
-	}
 
 	// DrawComponent2D の位置を更新
 	drawComp_->SetPosition(position_);
