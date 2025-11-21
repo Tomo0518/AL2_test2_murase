@@ -3,6 +3,15 @@
 
 GameShared::GameShared() {
 	LoadAllResources();
+
+	// マネージャー生成
+	particleManager_ = std::make_unique<ParticleManager>();
+
+	// 共通テクスチャ読み込み
+	LoadCommonTextures();
+
+	// パーティクルのリソースもここで読み込む！
+	particleManager_->LoadCommonResources();
 }
 
 void GameShared::LoadAllResources() {

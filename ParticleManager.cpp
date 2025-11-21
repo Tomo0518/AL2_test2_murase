@@ -141,6 +141,23 @@ void ParticleManager::Clear() {
 	// 実装に応じてフラグクリアなど
 }
 
+void ParticleManager::LoadCommonResources() {
+	//******************************
+	// 爆発のアニメーションの初期化出来てない問題がまだあるのでこれから対応
+	//******************************
+
+	// ここで一括ロード
+	texExplosion_ = Novice::LoadTexture("./Resources/images/effect/explosion.png");
+	texDebris_ = Novice::LoadTexture("./Resources/images/effect/debris.png");
+	texHit_ = Novice::LoadTexture("./Resources/images/effect/hit.png");
+
+	// ロードが終わったら、パラメータにハンドルをセットし直す
+	// （LoadParamsが先に呼ばれていたら、ここでハンドルだけ更新するイメージ）
+	params_[ParticleType::Explosion].textureHandle = texExplosion_;
+	params_[ParticleType::Debris].textureHandle = texDebris_;
+	params_[ParticleType::Hit].textureHandle = texHit_;
+}
+
 Particle& ParticleManager::GetNextParticle() {
 	Particle& p = particles_[nextIndex_];
 	nextIndex_ = (nextIndex_ + 1) % kMaxParticles;

@@ -7,6 +7,8 @@
 #include <Novice.h>
 #include <array>
 #include "stageMaxNum.h"
+#include <memory>
+#include "ParticleManager.h"
 
 enum class BgmKind {
 	None,
@@ -136,6 +138,12 @@ public:
 	void MarkExplanationViewed() { explanationViewed = true; }
 
 public:
+
+	// ========================================
+	// パーティクル管理
+	// ========================================
+	std::unique_ptr<ParticleManager>particleManager_;
+
 	// ========================================
 	// 入力モード管理
 	// ========================================

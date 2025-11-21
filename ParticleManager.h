@@ -75,6 +75,9 @@ public:
 	// 全消去
 	void Clear();
 
+	// リソース読み込み（GameSharedから呼ぶ）
+	void LoadCommonResources();
+
 private:
 	// 初期設定（デフォルト値をロード）
 	void LoadParams();
@@ -93,6 +96,12 @@ private:
 
 	// パラメータ辞書
 	std::map<ParticleType, ParticleParam> params_;
+
+	// 汎用エフェクト用テクスチャハンドル
+	int texExplosion_ = -1;
+	int texDebris_ = -1;
+	int texHit_ = -1;
+	int texDust_ = -1;
 
 	// デバッグ用：現在選択中のエフェクトタイプ
 	ParticleType currentDebugType_ = ParticleType::Explosion;
