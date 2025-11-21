@@ -12,7 +12,7 @@ Player::Player() {
 
 	// 初期設定
 	drawComp_->SetPosition(position_);
-	drawComp_->SetScale({ 2.0f, 2.0f });  // 2倍サイズで描画
+	drawComp_->SetScale({ 1.0f, 1.0f });  // 2倍サイズで描画
 	drawComp_->SetAnchorPoint({ 0.5f, 0.5f });  // 中心を基準点に
 }
 

@@ -3,12 +3,13 @@
 #include "DebugWindow.h"
 #include <Novice.h>
 #include <cstdio>
+#include "ParticleManager.h"
 
 GamePlayScene::GamePlayScene(SceneManager& mgr, GameShared& shared)
-	: manager_(mgr), shared_(shared) {
+	: manager_(mgr), shared_(&shared) {
 
-	shared_.pad.Update();
-	shared_.MarkExplanationViewed();
+	shared_->pad.Update();
+	shared_->MarkExplanationViewed();
 
 	// テクスチャをロード
 	grHandleBackground_ = Novice::LoadTexture("./Resources/images/explanation/background.png");
@@ -68,7 +69,7 @@ void GamePlayScene::InitializeBackground() {
 }
 
 void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
-	shared_.pad.Update();
+	shared_->pad.Update();
 
 	// フェードイン
 	if (fade_ < 1.0f) {
@@ -77,14 +78,14 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 
 	// シーンを閉じる
 	bool openPause =
-		shared_.pad.Trigger(Pad::Button::Start) ||
-		shared_.pad.Trigger(Pad::Button::Y) ||
-		shared_.pad.Trigger(Pad::Button::Back) ||
+		shared_->pad.Trigger(Pad::Button::Start) ||
+		shared_->pad.Trigger(Pad::Button::Y) ||
+		shared_->pad.Trigger(Pad::Button::Back) ||
 		(!pre[DIK_ESCAPE] && keys[DIK_ESCAPE]) ||
 		(!pre[DIK_RETURN] && keys[DIK_RETURN]);
 
 	if (openPause) {
-		shared_.PlayBackSe();
+		shared_->PlayBackSe();
 		manager_.RequestPause();
 		return;
 	}
@@ -105,6 +106,27 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 		player_->Update(dt, keys, pre, camera_->GetIsDebugCamera());
 	}
 
+	// パーティクルマネージャーの更新
+	shared_->particleManager_->Update(dt);
+
+	// テスト: スペースキーで爆発エフェクト
+	if (keys[DIK_SPACE] && !pre[DIK_SPACE]) {
+		Vector2 playerPos = player_->GetPosition();
+		shared_->particleManager_->Emit(ParticleType::Explosion, playerPos);
+	}
+
+	// テスト: Jキーでデブリエフェクト
+	if (keys[DIK_J] && !pre[DIK_J]) {
+		Vector2 playerPos = player_->GetPosition();
+		shared_->particleManager_->Emit(ParticleType::Debris, playerPos);
+	}
+
+	// テスト: Lキーでヒットエフェクト
+	if (keys[DIK_L] && !pre[DIK_L]) {
+		Vector2 playerPos = player_->GetPosition();
+		shared_->particleManager_->Emit(ParticleType::Hit, playerPos);
+	}
+
 	// カメラを更新
 	if (camera_) {
 		camera_->Update(dt);
@@ -117,10 +139,19 @@ void GamePlayScene::Draw() {
 		background->Draw(*camera_);
 	}
 
+	// パーティクル描画（カメラを使用）
+	shared_->particleManager_->Draw(*camera_);
+
 	// プレイヤーを描画（カメラ使用）
 	if (player_ && camera_) {
 		player_->Draw(*camera_);
 	}
+
+
+#ifdef _DEBUG
+	// デバッグウィンドウ
+	shared_->particleManager_->DrawDebugWindow();
+#endif
 
 #ifdef _DEBUG
 	// デバッグウィンドウを描画

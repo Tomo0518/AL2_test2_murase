@@ -119,15 +119,31 @@ DrawComponent2D& DrawComponent2D::operator=(DrawComponent2D&& other) noexcept {
 
 // ========== 初期化 ==========
 void DrawComponent2D::InitializeImageSize(int divX, int divY) {
+	// ハンドルが無効な場合は早期リターン
 	if (graphHandle_ < 0) {
 		imageSize_ = { 0.0f, 0.0f };
 		drawSize_ = { 0.0f, 0.0f };
 		return;
 	}
 
-	// Novice::GetGraphSize で画像全体のサイズを取得
+	// divXとdivYのゼロチェック（ゼロ除算回避）
+	if (divX <= 0) divX = 1;
+	if (divY <= 0) divY = 1;
+
+	// 画像全体のサイズを取得
 	int fullWidth = 0, fullHeight = 0;
 	Novice::GetTextureSize(graphHandle_, &fullWidth, &fullHeight);
+
+	// GetTextureSizeが失敗した場合のチェック
+	if (fullWidth <= 0 || fullHeight <= 0) {
+		imageSize_ = { 0.0f, 0.0f };
+		drawSize_ = { 0.0f, 0.0f };
+#ifdef _DEBUG
+		Novice::ConsolePrintf("DrawComponent2D::InitializeImageSize - Invalid texture size: %d x %d (handle: %d)\n",
+			fullWidth, fullHeight, graphHandle_);
+#endif
+		return;
+	}
 
 	// 1フレーム分のサイズを計算
 	imageSize_.x = static_cast<float>(fullWidth) / divX;
@@ -334,31 +350,68 @@ int DrawComponent2D::GetTotalFrames() const {
 	return animation_ ? animation_->GetTotalFrames() : 1;
 }
 
-// ========== 再設定用メソッド ==========
 void DrawComponent2D::Setup(int graphHandle, int divX, int divY, int totalFrames, float speed, bool isLoop) {
+	// 画像ハンドルを設定
 	graphHandle_ = graphHandle;
 
-	// 画像サイズ再計算
+	// ゼロチェック
+	if (divX <= 0) divX = 1;
+	if (divY <= 0) divY = 1;
+	if (totalFrames <= 0) totalFrames = 1;
+
+	// 画像サイズを再計算
 	InitializeImageSize(divX, divY);
 
-	// アニメーションを再作成（リセット）
+	// 画像サイズが無効な場合は処理を中断
+	if (imageSize_.x <= 0.0f || imageSize_.y <= 0.0f) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("DrawComponent2D::Setup - Failed to initialize image size\n");
+#endif
+		return;
+	}
+
+	// アニメーションを再生成
 	int frameWidth = static_cast<int>(imageSize_.x);
 	int frameHeight = static_cast<int>(imageSize_.y);
 
-	// 古いアニメーションがあれば破棄して作り直す
-	animation_ = std::make_unique<Animation>(
-		graphHandle, frameWidth, frameHeight, totalFrames, divX, speed, isLoop
-	);
-	animation_->Play();
+	// フレームサイズが無効な場合もチェック
+	if (frameWidth <= 0 || frameHeight <= 0) {
+#ifdef _DEBUG
+		Novice::ConsolePrintf("DrawComponent2D::Setup - Invalid frame size: %d x %d\n", frameWidth, frameHeight);
+#endif
+		return;
+	}
 
-	// エフェクトなどはリセットしておく
-	StopAllEffects();
+	if (totalFrames > 1 || (divX > 1 || divY > 1)) {
+		animation_ = std::make_unique<Animation>(
+			graphHandle, frameWidth, frameHeight, totalFrames, divX, speed, isLoop
+		);
+		if (animation_) {
+			animation_->Play();
+		}
+	}
+	else {
+		// 静止画の場合は1フレームのアニメーションとして扱う
+		animation_ = std::make_unique<Animation>(
+			graphHandle, frameWidth, frameHeight, 1, 1, 0.0f, false
+		);
+	}
 
-	// 描画サイズなども初期化
-	drawSize_ = imageSize_;
+
+	// エフェクトをリセット
+	effect_.StopAll();
+
+	// フェードエフェクトの色を明示的に初期化
+	effect_ = Effect(); // コンストラクタで再初期化
+
+	// 基本パラメータをリセット
+	position_ = { 0.0f, 0.0f };
 	scale_ = { 1.0f, 1.0f };
 	rotation_ = 0.0f;
+	anchorPoint_ = { 0.5f, 0.5f };
 	baseColor_ = 0xFFFFFFFF;
+	flipX_ = false;
+	flipY_ = false;
 }
 
 // ========== デバッグ ==========

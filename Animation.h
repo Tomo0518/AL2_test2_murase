@@ -1,4 +1,14 @@
 ﻿#pragma once
+#include <algorithm>
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 
 class Animation {
 private:
@@ -28,9 +38,13 @@ public:
 	// コンストラクタ
 	Animation(int grHandle, int frameWidth, int frameHeight, int totalFrames,
 		int framesPerRow, float frameSpeed, bool isLoop)
-		: grHandle_(grHandle), frameWidth_(frameWidth), frameHeight_(frameHeight),
-		totalFrames_(totalFrames), framesPerRow_(framesPerRow),
-		frameDuration_(frameSpeed), isLooping_(isLoop) {
+		: grHandle_(grHandle)
+		, frameWidth_(std::max(1, frameWidth))        // ←最小値1を保証
+		, frameHeight_(std::max(1, frameHeight))      // ←最小値1を保証
+		, totalFrames_(std::max(1, totalFrames))      // ←最小値1を保証
+		, framesPerRow_(std::max(1, framesPerRow))    // ←最小値1を保証（ゼロ除算回避）
+		, frameDuration_(std::max(0.001f, frameSpeed)) // ←最小値0.001秒を保証
+		, isLooping_(isLoop) {
 
 		isPlaying_ = true;
 		// 初期フレーム設定
@@ -91,7 +105,8 @@ public:
 			if (currentFrame_ >= totalFrames_) {
 				if (isLooping_) {
 					currentFrame_ = 0;
-				} else {
+				}
+				else {
 					currentFrame_ = totalFrames_ - 1;
 					isPlaying_ = false;
 				}

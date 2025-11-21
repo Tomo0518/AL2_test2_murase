@@ -44,6 +44,13 @@ ColorRGBA ColorRGBA::Add(const ColorRGBA& a, const ColorRGBA& b) {
 	);
 }
 
+Effect::Effect() {
+	// フェード効果の初期化（不透明な白）
+	fadeEffect_.currentColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	fadeEffect_.startColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	fadeEffect_.targetColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 // ========== Effect 更新 ==========
 void Effect::Update(float deltaTime) {
 	UpdateShake(deltaTime);
@@ -146,6 +153,12 @@ void Effect::StartFade(float targetAlpha, float duration) {
 	fadeEffect_.isActive = true;
 	fadeEffect_.duration = duration;
 	fadeEffect_.elapsed = 0.0f;
+
+	// 初期化されていない場合は白・不透明で初期化
+	if (!fadeEffect_.isActive && fadeEffect_.currentColor.a == 0.0f) {
+		fadeEffect_.currentColor = ColorRGBA::White();
+	}
+
 	fadeEffect_.startColor = fadeEffect_.currentColor;
 	fadeEffect_.targetColor = fadeEffect_.currentColor;
 	fadeEffect_.targetColor.a = targetAlpha;
@@ -155,6 +168,12 @@ void Effect::StartColorTransition(const ColorRGBA& targetColor, float duration) 
 	fadeEffect_.isActive = true;
 	fadeEffect_.duration = duration;
 	fadeEffect_.elapsed = 0.0f;
+
+	// 初期化されていない場合は白・不透明で初期化
+	if (fadeEffect_.currentColor.a == 0.0f && fadeEffect_.currentColor.r == 0.0f) {
+		fadeEffect_.currentColor = ColorRGBA::White();
+	}
+
 	fadeEffect_.startColor = fadeEffect_.currentColor;
 	fadeEffect_.targetColor = targetColor;
 }
@@ -347,4 +366,9 @@ void Effect::StopAll() {
 	StopRotation();
 	StopFade();
 	StopScale();
+
+	// フェード色をリセット
+	fadeEffect_.currentColor = ColorRGBA::White();
+	fadeEffect_.startColor = ColorRGBA::White();
+	fadeEffect_.targetColor = ColorRGBA::White();
 }

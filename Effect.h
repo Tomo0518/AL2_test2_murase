@@ -101,7 +101,7 @@ struct SquashEffect {
 // ========== Effect クラス ==========
 class Effect {
 public:
-	Effect() = default;
+	Effect();
 	~Effect() = default;
 
 	// ========== 更新 ==========

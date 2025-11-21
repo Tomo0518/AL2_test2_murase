@@ -26,7 +26,7 @@ private:
 	void InitializeBackground();
 
 	SceneManager& manager_;
-	GameShared& shared_;
+	GameShared* shared_;
 	float fade_ = 0.0f;
 
 	// ========== ゲームオブジェクト ==========

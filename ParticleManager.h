@@ -23,16 +23,19 @@ struct ParticleParam {
 	int textureHandle = -1;  // テクスチャ
 
 	// --- 寿命（フレーム数） ---
-	// min〜maxの間でランダムになる
 	int lifeMin = 30;
 	int lifeMax = 60;
 
 	// --- 物理挙動 ---
 	float speedMin = 100.0f;
 	float speedMax = 200.0f;
-	float angleBase = 0.0f;   // 基準角度（度数法: 0=右, 90=下, -90=上）
-	float angleRange = 360.0f; // 拡散角度（360なら全方位）
+	float angleBase = 0.0f;
+	float angleRange = 360.0f;
 	Vector2 gravity = { 0.0f, 0.0f };
+
+	// --- 見た目（サイズ） ---
+	float sizeMin = 16.0f;    // 最小サイズ（ピクセル）
+	float sizeMax = 32.0f;    // 最大サイズ（ピクセル）
 
 	// --- 見た目（スケール） ---
 	float scaleStart = 1.0f;
@@ -40,14 +43,14 @@ struct ParticleParam {
 
 	// --- 見た目（色） ---
 	unsigned int colorStart = 0xFFFFFFFF;
-	unsigned int colorEnd = 0xFFFFFF00; // アルファ0で消えるのが基本
+	unsigned int colorEnd = 0xFFFFFF00;
 
 	// --- アニメーション ---
 	bool useAnimation = false;
 	int divX = 1;
 	int divY = 1;
 	int totalFrames = 1;
-	float animSpeed = 0.1f; // 秒/フレーム
+	float animSpeed = 0.1f;
 };
 
 class ParticleManager {
