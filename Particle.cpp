@@ -19,7 +19,7 @@ void Particle::Initialize(const Vector2& pos, const Vector2& vel, const Vector2&
 	acceleration_ = acc;
 	lifeTimer_ = life;
 	maxLife_ = life;
-	type_ = ParticleType::Physics; // デフォルト
+	behavior_ = ParticleBehavior::Physics;
 
 	// 2. DrawComponentの再セットアップ
 	drawComp_->Setup(texHandle, divX, divY, frames, animSpeed, loop);
@@ -43,14 +43,14 @@ void Particle::Update(float deltaTime) {
 	}
 
 	// 2. タイプ別の挙動
-	if (type_ == ParticleType::Physics) {
+	if (behavior_ == ParticleBehavior::Physics) {
 		// 物理移動
 		velocity_.x += acceleration_.x * deltaTime;
 		velocity_.y += acceleration_.y * deltaTime;
 		position_.x += velocity_.x * deltaTime;
 		position_.y += velocity_.y * deltaTime;
 	}
-	else if (type_ == ParticleType::Ghost) {
+	else if (behavior_ == ParticleBehavior::Ghost) {
 		// 残像：移動はしないが、フェードアウトなどを管理
 		// (DrawCompのエフェクトで処理するのでここは空でもOK)
 	}

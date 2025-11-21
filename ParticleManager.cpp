@@ -96,7 +96,7 @@ void ParticleManager::Emit(ParticleType type, const Vector2& pos) {
 			param.textureHandle,
 			param.divX, param.divY, param.totalFrames, param.animSpeed, false
 		);
-		p.SetType(ParticleType::Physics); // 基本は物理挙動
+		p.SetBehavior(ParticleBehavior::Physics); // 基本は物理挙動
 
 		// --- DrawComponentへの追加設定 ---
 		auto* drawComp = p.GetDrawComponent();
@@ -127,7 +127,7 @@ void ParticleManager::EmitDashGhost(const Vector2& pos, float scale, float rotat
 	// 特殊系はこれまで通り個別にロジックを書く
 	Particle& p = GetNextParticle();
 	p.Initialize(pos, { 0,0 }, { 0,0 }, 20, texHandle);
-	p.SetType(ParticleType::Ghost);
+	p.SetBehavior(ParticleBehavior::Ghost);
 
 	auto* drawComp = p.GetDrawComponent();
 	drawComp->SetScale(scale, scale);

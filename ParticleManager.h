@@ -6,7 +6,7 @@
 #include <map>
 #include <string>
 
-// エフェクトの種類（ここに追加していく）
+// エフェクトの種類
 enum class ParticleType {
 	Explosion,   // 爆発
 	Debris,      // 岩の破片
