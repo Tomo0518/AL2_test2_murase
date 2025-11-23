@@ -18,11 +18,18 @@ GamePlayScene::GamePlayScene(SceneManager& mgr, GameShared& shared)
 	// 初期化
 	Initialize();
 
+	float groundY = 0.0f; // 地面のY座標
+	shared_->particleManager_->SetGroundLevel(groundY);
+
+	// 雨の発生（画面上部から）
+	shared_->particleManager_->Emit(ParticleType::Rain, { 640.0f, 800.0f });
+
 	// デバッグウィンドウを作成
 	debugWindow_ = std::make_unique<DebugWindow>();
 }
 
 GamePlayScene::~GamePlayScene() {
+	shared_->particleManager_->StopAllContinuousEmit();
 }
 
 void GamePlayScene::Initialize() {
@@ -71,12 +78,10 @@ void GamePlayScene::InitializeBackground() {
 void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 	shared_->pad.Update();
 
-	// フェードイン
 	if (fade_ < 1.0f) {
 		fade_ += dt * 4.0f;
 	}
 
-	// シーンを閉じる
 	bool openPause =
 		shared_->pad.Trigger(Pad::Button::Start) ||
 		shared_->pad.Trigger(Pad::Button::Y) ||
@@ -91,8 +96,6 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 	}
 
 #ifdef _DEBUG
-
-	// カメラデバッグモード
 	if (camera_->GetIsDebugCamera() && camera_) {
 		camera_->DebugMove(true, keys, pre);
 	}
@@ -101,7 +104,6 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 	}
 #endif
 
-	// プレイヤーを更新
 	if (player_) {
 		player_->Update(dt, keys, pre, camera_->GetIsDebugCamera());
 	}
@@ -127,7 +129,18 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 		shared_->particleManager_->Emit(ParticleType::Hit, playerPos);
 	}
 
-	// カメラを更新
+	// テスト: Rキーで雨ON/OFF
+	if (keys[DIK_R] && !pre[DIK_R]) {
+		static bool rainEnabled = true;
+		rainEnabled = !rainEnabled;
+		if (rainEnabled) {
+			shared_->particleManager_->StartContinuousEmit(ParticleType::Rain, { 640.0f, 800.0f });
+		}
+		else {
+			shared_->particleManager_->StopContinuousEmit(ParticleType::Rain);
+		}
+	}
+
 	if (camera_) {
 		camera_->Update(dt);
 	}
