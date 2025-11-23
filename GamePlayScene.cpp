@@ -18,11 +18,9 @@ GamePlayScene::GamePlayScene(SceneManager& mgr, GameShared& shared)
 	// 初期化
 	Initialize();
 
-	float groundY = 0.0f; // 地面のY座標
+	// ★地面レベルの設定（Y+が上方向なので、下端は負の値）
+	float groundY = -360.0f; // 画面下端
 	shared_->particleManager_->SetGroundLevel(groundY);
-
-	// 雨の発生（画面上部から）
-	shared_->particleManager_->Emit(ParticleType::Rain, { 640.0f, 800.0f });
 
 	// デバッグウィンドウを作成
 	debugWindow_ = std::make_unique<DebugWindow>();
@@ -40,7 +38,7 @@ void GamePlayScene::Initialize() {
 }
 
 void GamePlayScene::InitializeCamera() {
-	bool isWorldYUp = true; // 上に行けばYが+ならtreu
+	bool isWorldYUp = true; // 上に行けばYが+ならtrue
 	camera_ = std::make_unique<Camera2D>(Vector2{ 640.0f, 360.0f }, Vector2{ 1280.0f, 720.0f }, isWorldYUp);
 	camera_->SetFollowSpeed(0.1f);
 	camera_->SetDeadZone(150.0f, 100.0f);
@@ -50,6 +48,25 @@ void GamePlayScene::InitializeCamera() {
 void GamePlayScene::InitializePlayer() {
 	player_ = std::make_unique<Player>();
 	player_->SetPosition({ 640.0f, 360.0f });
+
+	// ★カメラをプレイヤーに追従させる
+	if (camera_) {
+		camera_->SetTarget(&player_->GetPositionRef());
+	}
+
+	// ★環境パーティクルのデフォルトを開始（プレイヤー追従）
+	if (shared_->particleManager_) {
+		// プレイヤー位置へのポインタを取得
+		const Vector2* playerPosPtr = &player_->GetPositionRef();
+
+		// 雨を開始
+		shared_->particleManager_->StartEnvironmentEffect(ParticleType::Rain, EmitterFollowMode::FollowTarget);
+		shared_->particleManager_->SetFollowTarget(ParticleType::Rain, playerPosPtr);
+
+		// 必要に応じて他の環境エフェクトも開始
+		// shared_->particleManager_->StartEnvironmentEffect(ParticleType::Snow, EmitterFollowMode::FollowTarget);
+		// shared_->particleManager_->SetFollowTarget(ParticleType::Snow, playerPosPtr);
+	}
 }
 
 void GamePlayScene::InitializeBackground() {
@@ -72,7 +89,6 @@ void GamePlayScene::InitializeBackground() {
 	background_[7]->SetPosition({ 0.0f, -720.0f });
 	background_.push_back(std::make_unique<Background>(Novice::LoadTexture("./Resources/images/gamePlay/background/background2_2.png")));
 	background_[8]->SetPosition({ 1280.0f, -720.0f });
-
 }
 
 void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
@@ -129,18 +145,6 @@ void GamePlayScene::Update(float dt, const char* keys, const char* pre) {
 		shared_->particleManager_->Emit(ParticleType::Hit, playerPos);
 	}
 
-	// テスト: Rキーで雨ON/OFF
-	if (keys[DIK_R] && !pre[DIK_R]) {
-		static bool rainEnabled = true;
-		rainEnabled = !rainEnabled;
-		if (rainEnabled) {
-			shared_->particleManager_->StartContinuousEmit(ParticleType::Rain, { 640.0f, 800.0f });
-		}
-		else {
-			shared_->particleManager_->StopContinuousEmit(ParticleType::Rain);
-		}
-	}
-
 	if (camera_) {
 		camera_->Update(dt);
 	}
@@ -160,18 +164,14 @@ void GamePlayScene::Draw() {
 		player_->Draw(*camera_);
 	}
 
-
-#ifdef _DEBUG
-	// デバッグウィンドウ
-	shared_->particleManager_->DrawDebugWindow();
-#endif
-
 #ifdef _DEBUG
 	// デバッグウィンドウを描画
 	if (debugWindow_) {
 		debugWindow_->DrawDebugGui();
 		debugWindow_->DrawCameraDebugWindow(camera_.get());
 		debugWindow_->DrawPlayerDebugWindow(player_.get());
+		// ★パーティクルデバッグウィンドウを追加
+		debugWindow_->DrawParticleDebugWindow(shared_->particleManager_.get());
 	}
 #endif
 }

@@ -1,16 +1,17 @@
 ﻿#pragma once
-#include "Vector2.h"
 
+// 前方宣言
 class Camera2D;
 class Player;
+class ParticleManager;
 
 /// <summary>
 /// 統合デバッグウィンドウ
-/// カメラ、プレイヤー、その他のデバッグ情報を一元管理
+/// カメラ、プレイヤー、パーティクルのデバッグ情報を一元管理
 /// </summary>
 class DebugWindow {
 public:
-	DebugWindow() = default;
+	DebugWindow();
 	~DebugWindow() = default;
 
 	// ========================================
@@ -21,22 +22,17 @@ public:
 	// ========================================
 	// カメラデバッグGUI
 	// ========================================
-
-	/// <summary>
-	/// カメラのデバッグウィンドウを描画
-	/// </summary>
-	/// <param name="camera">デバッグ対象のカメラ</param>
 	void DrawCameraDebugWindow(Camera2D* camera);
 
 	// ========================================
 	// プレイヤーデバッグGUI
 	// ========================================
-
-	/// <summary>
-	/// プレイヤーのデバッグウィンドウを描画
-	/// </summary>
-	/// <param name="player">デバッグ対象のプレイヤー</param>
 	void DrawPlayerDebugWindow(Player* player);
+
+	// ========================================
+	// ★追加：パーティクルデバッグGUI
+	// ========================================
+	void DrawParticleDebugWindow(ParticleManager* particleManager);
 
 private:
 	// カメラデバッグモードの状態
@@ -48,4 +44,10 @@ private:
 
 	// プレイヤーデバッグの状態
 	bool showPlayerWindow_ = true;
+
+	// ★追加：パーティクルデバッグの状態
+	bool showParticleWindow_ = true;
+	bool showEnvironmentParticles_ = true;
+	bool showActiveParticles_ = true;
+	bool showParticleParams_ = false;
 };

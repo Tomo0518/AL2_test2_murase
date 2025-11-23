@@ -34,6 +34,10 @@ public:
 	float GetRadius() const { return radius_; }
 	bool IsAlive() const { return isAlive_; }
 
+	// 位置への const 参照を返すメソッド
+	const Vector2& GetPositionRef() const { return position_; }
+
+
 	// ========== セッター ==========
 	void SetPosition(const Vector2& pos) { position_ = pos; }
 	void SetAlive(bool alive) { isAlive_ = alive; }

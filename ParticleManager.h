@@ -11,6 +11,14 @@
 
 // 前方宣言
 class Camera2D;
+class DebugWindow;
+
+// エミッターの追従モード
+enum class EmitterFollowMode {
+	None,           // 固定位置（発生時の座標で固定）
+	FollowTarget,   // ターゲット追従（プレイヤーなど）
+	WorldPoint      // ワールド座標の固定点
+};
 
 // 1種類のエフェクトの設定データ（拡張版）
 struct ParticleParam {
@@ -51,9 +59,16 @@ struct ParticleParam {
 	// 連続発生設定
 	bool isContinuous = false;         // 連続発生するか
 	float emitInterval = 0.0f;         // 発生間隔（秒）
+
+	// 環境エフェクト専用パラメータ
+	float bounceDamping = 0.3f;        // 地面反発係数（雨用）
+	float windStrength = 0.0f;         // 横風の強さ（雪用）
+	float floatAmplitude = 0.0f;       // 浮遊の振幅（オーブ用）
+	float floatFrequency = 1.0f;       // 浮遊の周波数（オーブ用）
 };
 
 class ParticleManager {
+	friend class DebugWindow;
 public:
 	ParticleManager();
 	~ParticleManager() = default;
@@ -73,6 +88,13 @@ public:
 	void StopContinuousEmit(ParticleType type);
 	void StopAllContinuousEmit();
 
+	// 環境パーティクル専用API
+	void StartEnvironmentEffect(ParticleType type, EmitterFollowMode mode, const Vector2& basePos = { 0.0f, 0.0f });
+	void StopEnvironmentEffect(ParticleType type);
+	void UpdateEnvironmentParams(ParticleType type, const ParticleParam& newParams);
+	void SetFollowTarget(ParticleType type, const Vector2* target);
+	void UpdateFollowPosition(ParticleType type, const Vector2& newPos);
+
 	// 地面との衝突判定を設定
 	void SetGroundLevel(float groundY);
 	float GetGroundLevel() const { return groundLevel_; }
@@ -80,6 +102,10 @@ public:
 	// JSON保存/読み込み
 	bool SaveParamsToJson(const std::string& filepath);
 	bool LoadParamsFromJson(const std::string& filepath);
+
+	// パラメータの取得/設定
+	ParticleParam* GetParam(ParticleType type);
+	const ParticleParam* GetParam(ParticleType type) const;
 
 private:
 	void LoadParams();
@@ -98,8 +124,10 @@ private:
 	// 連続発生の管理構造体
 	struct ContinuousEmitter {
 		ParticleType type;
-		Vector2 position;
-		const Vector2* target = nullptr;
+		Vector2 position;                    // 基準位置
+		EmitterFollowMode followMode;        // 追従モード
+		const Vector2* followTarget;         // 追従対象（プレイヤー位置など）
+		const Vector2* target = nullptr;     // Homing用ターゲット
 		float timer = 0.0f;
 		bool isActive = false;
 	};
@@ -109,9 +137,9 @@ private:
 	int nextIndex_ = 0;
 
 	std::map<ParticleType, ParticleParam> params_;
-	std::map<ParticleType, ContinuousEmitter> continuousEmitters_;  // ★追加
+	std::map<ParticleType, ContinuousEmitter> continuousEmitters_;
 
-	float groundLevel_ = 0.0f;  // ★追加：地面のY座標
+	float groundLevel_ = 0.0f;  // 地面のY座標
 
 	int texExplosion_ = -1;
 	int texDebris_ = -1;
