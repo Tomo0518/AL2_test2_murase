@@ -7,16 +7,19 @@
         "angleBase": 0.0,
         "angleRange": 360.0,
         "animSpeed": 0.10000000149011612,
-        "blendMode": "Normal",
-        "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 1,
+        "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 65535,
+        "colorStart": 16777215,
+        "count": 5,
         "divX": 1,
         "divY": 1,
         "emitRange": {
-            "x": 0.0,
-            "y": 0.0
+            "x": 100.0,
+            "y": 100.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
@@ -25,15 +28,16 @@
         "lifeMin": 30,
         "rotationSpeedMax": 0.0,
         "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
+        "scaleEnd": 0.5,
         "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
+        "sizeMax": 16.0,
+        "sizeMin": 8.0,
+        "speedMax": 100.0,
+        "speedMin": 50.0,
         "textureHandle": 10,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Debris": {
         "acceleration": {
@@ -44,23 +48,26 @@
         "angleRange": 360.0,
         "animSpeed": 0.0,
         "blendMode": "Normal",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967040,
         "colorStart": 4294967295,
         "count": 10,
         "divX": 1,
         "divY": 1,
         "emitRange": {
-            "x": 0.0,
-            "y": 0.0
+            "x": 20.0,
+            "y": 20.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": -800.0
         },
         "lifeMax": 60,
         "lifeMin": 40,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
+        "rotationSpeedMax": 0.10000000149011612,
+        "rotationSpeedMin": -0.10000000149011612,
         "scaleEnd": 0.30000001192092896,
         "scaleStart": 1.0,
         "sizeMax": 24.0,
@@ -69,7 +76,8 @@
         "speedMin": 150.0,
         "textureHandle": 4,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Dust": {
         "acceleration": {
@@ -79,24 +87,27 @@
         "angleBase": -90.0,
         "angleRange": 60.0,
         "animSpeed": 0.0,
-        "blendMode": "Add",
+        "blendMode": "Normal",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 2863311360,
         "colorStart": 2863311530,
         "count": 8,
         "divX": 1,
         "divY": 1,
         "emitRange": {
-            "x": 0.0,
-            "y": 0.0
+            "x": 30.0,
+            "y": 10.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": -50.0
         },
-        "lifeMax": 88,
-        "lifeMin": 87,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
+        "lifeMax": 45,
+        "lifeMin": 30,
+        "rotationSpeedMax": 0.05000000074505806,
+        "rotationSpeedMin": -0.05000000074505806,
         "scaleEnd": 1.5,
         "scaleStart": 0.5,
         "sizeMax": 64.0,
@@ -105,7 +116,8 @@
         "speedMin": 50.0,
         "textureHandle": 6,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Explosion": {
         "acceleration": {
@@ -116,6 +128,7 @@
         "angleRange": 0.0,
         "animSpeed": 0.05000000074505806,
         "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967295,
         "colorStart": 4294967295,
         "count": 1,
@@ -125,6 +138,8 @@
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
@@ -135,13 +150,14 @@
         "rotationSpeedMin": 0.0,
         "scaleEnd": 1.0,
         "scaleStart": 1.0,
-        "sizeMax": 140.5,
-        "sizeMin": 131.31199645996094,
+        "sizeMax": 64.0,
+        "sizeMin": 64.0,
         "speedMax": 0.0,
         "speedMin": 0.0,
         "textureHandle": 3,
         "totalFrames": 4,
-        "useAnimation": true
+        "useAnimation": true,
+        "windStrength": 0.0
     },
     "Glow": {
         "acceleration": {
@@ -149,81 +165,10 @@
             "y": 0.0
         },
         "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
-        "blendMode": "Normal",
-        "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 10,
-        "divX": 1,
-        "divY": 1,
-        "emitRange": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "gravity": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "lifeMax": 60,
-        "lifeMin": 30,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
-        "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
-        "textureHandle": 10,
-        "totalFrames": 1,
-        "useAnimation": false
-    },
-    "Hit": {
-        "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "angleBase": 153.75,
-        "angleRange": 136.875,
-        "animSpeed": 0.0,
-        "blendMode": "Add",
-        "colorEnd": 4294967040,
-        "colorStart": 1566431999,
-        "count": 18,
-        "divX": 1,
-        "divY": 1,
-        "emitRange": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "gravity": {
-            "x": 0.0,
-            "y": -460.0
-        },
-        "lifeMax": 52,
-        "lifeMin": 38,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.20000000298023224,
-        "scaleStart": 0.800000011920929,
-        "sizeMax": 91.93800354003906,
-        "sizeMin": 68.31199645996094,
-        "speedMax": 368.5419921875,
-        "speedMin": 161.45799255371094,
-        "textureHandle": 5,
-        "totalFrames": 1,
-        "useAnimation": false
-    },
-    "MuzzleFlash": {
-        "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "angleBase": 0.0,
         "angleRange": 0.0,
         "animSpeed": 0.0,
-        "blendMode": "Normal",
+        "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967040,
         "colorStart": 4294967295,
         "count": 1,
@@ -233,6 +178,88 @@
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
+        "gravity": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "lifeMax": 40,
+        "lifeMin": 20,
+        "rotationSpeedMax": 0.0,
+        "rotationSpeedMin": 0.0,
+        "scaleEnd": 0.0,
+        "scaleStart": 1.0,
+        "sizeMax": 0.0,
+        "sizeMin": 0.0,
+        "speedMax": 20.0,
+        "speedMin": 0.0,
+        "textureHandle": 10,
+        "totalFrames": 1,
+        "useAnimation": false,
+        "windStrength": 0.0
+    },
+    "Hit": {
+        "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "angleBase": 90.0,
+        "angleRange": 1550.0,
+        "animSpeed": 0.0,
+        "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 4294967040,
+        "colorStart": 4294967295,
+        "count": 18,
+        "divX": 1,
+        "divY": 1,
+        "emitRange": {
+            "x": 10.0,
+            "y": 10.0
+        },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
+        "gravity": {
+            "x": 0.0,
+            "y": -300.0
+        },
+        "lifeMax": 55,
+        "lifeMin": 15,
+        "rotationSpeedMax": 0.0,
+        "rotationSpeedMin": 0.0,
+        "scaleEnd": 0.20000000298023224,
+        "scaleStart": 0.800000011920929,
+        "sizeMax": 43.0,
+        "sizeMin": 27.0,
+        "speedMax": 280.0,
+        "speedMin": 225.0,
+        "textureHandle": 5,
+        "totalFrames": 1,
+        "useAnimation": false,
+        "windStrength": 0.0
+    },
+    "MuzzleFlash": {
+        "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "angleBase": 0.0,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
+        "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 4294967040,
+        "colorStart": 4294967295,
+        "count": 1,
+        "divX": 1,
+        "divY": 1,
+        "emitRange": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
@@ -249,7 +276,8 @@
         "speedMin": 0.0,
         "textureHandle": 5,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Orb": {
         "acceleration": {
@@ -257,71 +285,79 @@
             "y": 0.0
         },
         "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
-        "blendMode": "Normal",
-        "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 1,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
+        "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 4294947968,
+        "colorStart": 4294951167,
+        "count": 5,
         "divX": 1,
         "divY": 1,
         "emitRange": {
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 30.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
         },
-        "lifeMax": 60,
-        "lifeMin": 30,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
-        "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
+        "lifeMax": 360,
+        "lifeMin": 300,
+        "rotationSpeedMax": 0.05000000074505806,
+        "rotationSpeedMin": -0.05000000074505806,
+        "scaleEnd": 1.2000000476837158,
+        "scaleStart": 0.800000011920929,
+        "sizeMax": 24.0,
+        "sizeMin": 12.0,
+        "speedMax": 0.0,
+        "speedMin": 0.0,
         "textureHandle": 9,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Rain": {
         "acceleration": {
-            "x": 0.0,
+            "x": 100.0,
             "y": 0.0
         },
-        "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
+        "angleBase": -90.0,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
         "blendMode": "Normal",
-        "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 1,
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 2863267584,
+        "colorStart": 2863333375,
+        "count": 30,
         "divX": 1,
         "divY": 1,
         "emitRange": {
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
-            "y": 0.0
+            "y": -800.0
         },
-        "lifeMax": 60,
-        "lifeMin": 30,
+        "lifeMax": 180,
+        "lifeMin": 120,
         "rotationSpeedMax": 0.0,
         "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
+        "scaleEnd": 1.0,
         "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
+        "sizeMax": 4.98199987411499,
+        "sizeMin": 3.490999937057495,
+        "speedMax": 0.0,
+        "speedMin": 0.0,
         "textureHandle": 7,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Shockwave": {
         "acceleration": {
@@ -329,35 +365,39 @@
             "y": 0.0
         },
         "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
         "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 12,
+        "colorStart": 4294967244,
+        "count": 1,
         "divX": 1,
         "divY": 1,
         "emitRange": {
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
         },
-        "lifeMax": 60,
-        "lifeMin": 30,
+        "lifeMax": 20,
+        "lifeMin": 15,
         "rotationSpeedMax": 0.0,
         "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
-        "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
+        "scaleEnd": 2.5,
+        "scaleStart": 0.5,
+        "sizeMax": 0.0,
+        "sizeMin": 0.0,
+        "speedMax": 0.0,
+        "speedMin": 0.0,
         "textureHandle": 11,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     },
     "Slash": {
         "acceleration": {
@@ -365,81 +405,10 @@
             "y": 0.0
         },
         "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
-        "blendMode": "Normal",
-        "colorEnd": 4294967040,
-        "colorStart": 4294967295,
-        "count": 18,
-        "divX": 1,
-        "divY": 1,
-        "emitRange": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "gravity": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "lifeMax": 60,
-        "lifeMin": 30,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
-        "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
-        "textureHandle": 13,
-        "totalFrames": 1,
-        "useAnimation": false
-    },
-    "SmokeCloud": {
-        "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "angleBase": 90.0,
-        "angleRange": 58.125,
-        "animSpeed": 0.10000000149011612,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
         "blendMode": "Add",
-        "colorEnd": 4294967040,
-        "colorStart": 1720882175,
-        "count": 10,
-        "divX": 1,
-        "divY": 1,
-        "emitRange": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "gravity": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "lifeMax": 94,
-        "lifeMin": 76,
-        "rotationSpeedMax": 0.0,
-        "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.625,
-        "scaleStart": 1.0,
-        "sizeMax": 120.81300354003906,
-        "sizeMin": 107.68800354003906,
-        "speedMax": 235.41700744628906,
-        "speedMin": 63.54100036621094,
-        "textureHandle": 14,
-        "totalFrames": 1,
-        "useAnimation": false
-    },
-    "Snow": {
-        "acceleration": {
-            "x": 0.0,
-            "y": 0.0
-        },
-        "angleBase": 0.0,
-        "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
-        "blendMode": "Normal",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967040,
         "colorStart": 4294967295,
         "count": 1,
@@ -449,23 +418,106 @@
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
             "y": 0.0
         },
-        "lifeMax": 60,
-        "lifeMin": 30,
+        "lifeMax": 15,
+        "lifeMin": 10,
         "rotationSpeedMax": 0.0,
         "rotationSpeedMin": 0.0,
-        "scaleEnd": 0.0,
+        "scaleEnd": 0.5,
+        "scaleStart": 1.5,
+        "sizeMax": 0.0,
+        "sizeMin": 0.0,
+        "speedMax": 0.0,
+        "speedMin": 0.0,
+        "textureHandle": 13,
+        "totalFrames": 1,
+        "useAnimation": false,
+        "windStrength": 0.0
+    },
+    "SmokeCloud": {
+        "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "angleBase": 0.0,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
+        "blendMode": "Normal",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 0,
+        "colorStart": 2155905245,
+        "count": 2,
+        "divX": 1,
+        "divY": 1,
+        "emitRange": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
+        "gravity": {
+            "x": 0.0,
+            "y": 100.0
+        },
+        "lifeMax": 90,
+        "lifeMin": 60,
+        "rotationSpeedMax": 0.0,
+        "rotationSpeedMin": 0.0,
+        "scaleEnd": 1.5,
+        "scaleStart": 0.5,
+        "sizeMax": 0.0,
+        "sizeMin": 0.0,
+        "speedMax": 50.0,
+        "speedMin": 20.0,
+        "textureHandle": 14,
+        "totalFrames": 1,
+        "useAnimation": false,
+        "windStrength": 0.0
+    },
+    "Snow": {
+        "acceleration": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "angleBase": -90.0,
+        "angleRange": 0.0,
+        "animSpeed": 0.0,
+        "blendMode": "Normal",
+        "bounceDamping": 0.30000001192092896,
+        "colorEnd": 4294967295,
+        "colorStart": 4294967295,
+        "count": 50,
+        "divX": 1,
+        "divY": 1,
+        "emitRange": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
+        "gravity": {
+            "x": 0.0,
+            "y": -50.0
+        },
+        "lifeMax": 240,
+        "lifeMin": 180,
+        "rotationSpeedMax": 0.019999999552965164,
+        "rotationSpeedMin": -0.019999999552965164,
+        "scaleEnd": 1.0,
         "scaleStart": 1.0,
-        "sizeMax": 32.0,
-        "sizeMin": 16.0,
-        "speedMax": 200.0,
-        "speedMin": 100.0,
+        "sizeMax": 8.0,
+        "sizeMin": 4.0,
+        "speedMax": 0.0,
+        "speedMin": 0.0,
         "textureHandle": 8,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 30.0
     },
     "Sparkle": {
         "acceleration": {
@@ -474,33 +526,37 @@
         },
         "angleBase": 0.0,
         "angleRange": 360.0,
-        "animSpeed": 0.10000000149011612,
+        "animSpeed": 0.0,
         "blendMode": "Add",
+        "bounceDamping": 0.30000001192092896,
         "colorEnd": 4294967040,
-        "colorStart": 4143358463,
-        "count": 10,
+        "colorStart": 4294959359,
+        "count": 3,
         "divX": 1,
         "divY": 1,
         "emitRange": {
             "x": 0.0,
             "y": 0.0
         },
+        "floatAmplitude": 0.0,
+        "floatFrequency": 1.0,
         "gravity": {
             "x": 0.0,
-            "y": 0.0
+            "y": -400.0
         },
-        "lifeMax": 60,
+        "lifeMax": 50,
         "lifeMin": 30,
         "rotationSpeedMax": 0.0,
         "rotationSpeedMin": 0.0,
         "scaleEnd": 0.0,
-        "scaleStart": 1.0,
-        "sizeMax": 60.4379997253418,
-        "sizeMin": 47.3120002746582,
+        "scaleStart": 0.800000011920929,
+        "sizeMax": 0.0,
+        "sizeMin": 0.0,
         "speedMax": 200.0,
         "speedMin": 100.0,
         "textureHandle": 12,
         "totalFrames": 1,
-        "useAnimation": false
+        "useAnimation": false,
+        "windStrength": 0.0
     }
 }

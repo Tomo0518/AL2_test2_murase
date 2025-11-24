@@ -117,6 +117,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="ButtonManager.cpp" />
     <ClCompile Include="C:\KamataEngine\Adapter\Novice.cpp" />
     <ClCompile Include="Camera2D.cpp" />
+    <ClCompile Include="ComponentBase.cpp" />
     <ClCompile Include="DebugWindow.cpp" />
     <ClCompile Include="DrawComponent2D.cpp" />
     <ClCompile Include="Effect.cpp" />
@@ -126,6 +127,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="GameShared.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3x3.cpp" />
+    <ClCompile Include="Object2D.cpp" />
     <ClCompile Include="Pad.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
@@ -178,6 +180,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="C:\KamataEngine\DirectXGame\scene\GameScene.h" />
     <ClInclude Include="C:\KamataEngine\Adapter\Novice.h" />
     <ClInclude Include="Camera2D.h" />
+    <ClInclude Include="ComponentBase.h" />
     <ClInclude Include="DebugWindow.h" />
     <ClInclude Include="DrawComponent2D.h" />
     <ClInclude Include="Easing.h" />
@@ -190,6 +193,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonUtil.h" />
     <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Object2D.h" />
     <ClInclude Include="Pad.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleEnum.h" />
@@ -205,6 +209,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="StageSelectScene.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="Transform2D.h" />
     <ClInclude Include="UiDrawComponent.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vertex4.h" />

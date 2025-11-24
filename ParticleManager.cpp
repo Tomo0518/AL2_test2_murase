@@ -768,16 +768,41 @@ void ParticleManager::StopAllContinuousEmit() {
 }
 
 // =================================
-//  ★追加：環境パーティクル専用API
+//  環境パーティクル専用API
 // =================================
 void ParticleManager::StartEnvironmentEffect(ParticleType type, EmitterFollowMode mode, const Vector2& basePos) {
 	if (params_.find(type) == params_.end()) return;
+
+	// ★強制設定：環境パーティクルは必ず連続発生にする
+	params_[type].isContinuous = true;
+	if (params_[type].emitInterval <= 0.0f) {
+		switch (type) {
+		case ParticleType::Rain:
+			params_[type].emitInterval = 0.1f;
+			params_[type].emitterShape = EmitterShape::Line;  // ★追加
+			params_[type].emitterSize = { 1280.0f, 0.0f };    // ★追加
+			break;
+		case ParticleType::Snow:
+			params_[type].emitInterval = 0.15f;
+			params_[type].emitterShape = EmitterShape::Line;  // ★追加
+			params_[type].emitterSize = { 1280.0f, 0.0f };    // ★追加
+			break;
+		case ParticleType::Orb:
+			params_[type].emitInterval = 0.2f;
+			params_[type].emitterShape = EmitterShape::Rectangle;  // ★追加
+			params_[type].emitterSize = { 1280.0f, 720.0f };       // ★追加
+			break;
+		default:
+			params_[type].emitInterval = 0.1f;
+			break;
+		}
+	}
 
 	ContinuousEmitter& emitter = continuousEmitters_[type];
 	emitter.type = type;
 	emitter.position = basePos;
 	emitter.followMode = mode;
-	emitter.followTarget = nullptr;  // 後で SetFollowTarget で設定
+	emitter.followTarget = nullptr;
 	emitter.target = nullptr;
 	emitter.timer = 0.0f;
 	emitter.isActive = true;
@@ -789,7 +814,9 @@ void ParticleManager::StartEnvironmentEffect(ParticleType type, EmitterFollowMod
 	case EmitterFollowMode::FollowTarget: modeName = "FollowTarget"; break;
 	case EmitterFollowMode::WorldPoint: modeName = "WorldPoint"; break;
 	}
-	Novice::ConsolePrintf("StartEnvironmentEffect: Type=%d, Mode=%s\n", static_cast<int>(type), modeName);
+	Novice::ConsolePrintf("[INFO] StartEnvironmentEffect: Type=%d, Mode=%s, isContinuous=%d, Interval=%.2f, EmitterShape=%d\n",
+		static_cast<int>(type), modeName, params_[type].isContinuous, params_[type].emitInterval,
+		static_cast<int>(params_[type].emitterShape));
 #endif
 }
 

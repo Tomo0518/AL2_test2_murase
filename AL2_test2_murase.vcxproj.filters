@@ -113,6 +113,15 @@
     <Filter Include="KamataEngine\Source\library\json">
       <UniqueIdentifier>{5fb55ef0-75a1-4869-bb7c-84f0b9f104f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KamataEngine\Source\library\2D\Object">
+      <UniqueIdentifier>{cb735915-8412-42fc-a555-a3f8e359f839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KamataEngine\Source\library\2D\Component">
+      <UniqueIdentifier>{04be402e-ea39-47dc-a12f-25e8df166762}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KamataEngine\Source\library\2D\Component\ComponentBase">
+      <UniqueIdentifier>{3320bfb2-b5b7-457f-bda5-fbcb05a39150}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -211,6 +220,12 @@
     </ClCompile>
     <ClCompile Include="Particle.cpp">
       <Filter>KamataEngine\Source\library\2D\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Object2D.cpp">
+      <Filter>KamataEngine\Source\library\2D\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ComponentBase.cpp">
+      <Filter>KamataEngine\Source\library\2D\Component\ComponentBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -414,6 +429,15 @@
     </ClInclude>
     <ClInclude Include="ParticleEnum.h">
       <Filter>KamataEngine\Source\library\2D\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Object2D.h">
+      <Filter>KamataEngine\Source\library\2D\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentBase.h">
+      <Filter>KamataEngine\Source\library\2D\Component\ComponentBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform2D.h">
+      <Filter>KamataEngine\Source\library\2D\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

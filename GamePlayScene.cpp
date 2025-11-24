@@ -18,8 +18,8 @@ GamePlayScene::GamePlayScene(SceneManager& mgr, GameShared& shared)
 	// 初期化
 	Initialize();
 
-	// ★地面レベルの設定（Y+が上方向なので、下端は負の値）
-	float groundY = -360.0f; // 画面下端
+	// 地面レベルの設定（Y+が上方向なので、下端は負の値）
+	float groundY = 0.0f; // 画面下端
 	shared_->particleManager_->SetGroundLevel(groundY);
 
 	// デバッグウィンドウを作成
@@ -47,25 +47,22 @@ void GamePlayScene::InitializeCamera() {
 
 void GamePlayScene::InitializePlayer() {
 	player_ = std::make_unique<Player>();
-	player_->SetPosition({ 640.0f, 360.0f });
+	player_->SetPosition({ 640.0f, 560.0f });
 
-	// ★カメラをプレイヤーに追従させる
+	// カメラをプレイヤーに追従させる
 	if (camera_) {
 		camera_->SetTarget(&player_->GetPositionRef());
 	}
 
-	// ★環境パーティクルのデフォルトを開始（プレイヤー追従）
+	// 環境パーティクルは画面中央上部の固定位置から発生
 	if (shared_->particleManager_) {
-		// プレイヤー位置へのポインタを取得
-		const Vector2* playerPosPtr = &player_->GetPositionRef();
-
-		// 雨を開始
-		shared_->particleManager_->StartEnvironmentEffect(ParticleType::Rain, EmitterFollowMode::FollowTarget);
-		shared_->particleManager_->SetFollowTarget(ParticleType::Rain, playerPosPtr);
-
-		// 必要に応じて他の環境エフェクトも開始
-		// shared_->particleManager_->StartEnvironmentEffect(ParticleType::Snow, EmitterFollowMode::FollowTarget);
-		// shared_->particleManager_->SetFollowTarget(ParticleType::Snow, playerPosPtr);
+		// 雨を画面中央上部（Y座標720）に固定
+		Vector2 rainEmitPos = { 640.0f, 1320.0f };  // 画面中央上端
+		shared_->particleManager_->StartEnvironmentEffect(
+			ParticleType::Rain,
+			EmitterFollowMode::WorldPoint,  // 固定位置モード
+			rainEmitPos
+		);
 	}
 }
 
@@ -170,8 +167,8 @@ void GamePlayScene::Draw() {
 		debugWindow_->DrawDebugGui();
 		debugWindow_->DrawCameraDebugWindow(camera_.get());
 		debugWindow_->DrawPlayerDebugWindow(player_.get());
-		// ★パーティクルデバッグウィンドウを追加
-		debugWindow_->DrawParticleDebugWindow(shared_->particleManager_.get());
+		// パーティクルデバッグウィンドウを追加（プレイヤーも渡す）
+		debugWindow_->DrawParticleDebugWindow(shared_->particleManager_.get(), player_.get());
 	}
 #endif
 }

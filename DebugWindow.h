@@ -30,9 +30,9 @@ public:
 	void DrawPlayerDebugWindow(Player* player);
 
 	// ========================================
-	// ★追加：パーティクルデバッグGUI
+	// パーティクルデバッグGUI
 	// ========================================
-	void DrawParticleDebugWindow(ParticleManager* particleManager);
+	void DrawParticleDebugWindow(ParticleManager* particleManager, Player* player = nullptr);
 
 private:
 	// カメラデバッグモードの状態
@@ -50,4 +50,6 @@ private:
 	bool showEnvironmentParticles_ = true;
 	bool showActiveParticles_ = true;
 	bool showParticleParams_ = false;
+
+
 };
