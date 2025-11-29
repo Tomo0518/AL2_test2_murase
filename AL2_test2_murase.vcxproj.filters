@@ -122,6 +122,9 @@
     <Filter Include="KamataEngine\Source\library\2D\Component\ComponentBase">
       <UniqueIdentifier>{3320bfb2-b5b7-457f-bda5-fbcb05a39150}</UniqueIdentifier>
     </Filter>
+    <Filter Include="KamataEngine\Source\Game\Scene\NightSky">
+      <UniqueIdentifier>{82002ce7-e9bf-46ad-9d90-17a4f1a83965}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -226,6 +229,9 @@
     </ClCompile>
     <ClCompile Include="ComponentBase.cpp">
       <Filter>KamataEngine\Source\library\2D\Component\ComponentBase</Filter>
+    </ClCompile>
+    <ClCompile Include="NightSkyScene.cpp">
+      <Filter>KamataEngine\Source\Game\Scene\NightSky</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -438,6 +444,9 @@
     </ClInclude>
     <ClInclude Include="Transform2D.h">
       <Filter>KamataEngine\Source\library\2D\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="NightSkyScene.h">
+      <Filter>KamataEngine\Source\Game\Scene\NightSky</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

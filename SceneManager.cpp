@@ -5,6 +5,7 @@
 #include "SettingScene.h"
 #include "PauseScene.h"
 #include "ResultScene.h"
+#include "NightSkyScene.h"
 
 #include "GamePlayScene.h"
 #include "Stage1Scene.h"
@@ -14,7 +15,7 @@
 
 SceneManager::SceneManager() {
 	shared_.LoadCommonTextures();
-	ChangeScene(SceneType::GamePlay);
+	ChangeScene(SceneType::NightSky);
 }
 
 void SceneManager::Update(float dt, const char* keys, const char* pre) {
@@ -143,6 +144,10 @@ void SceneManager::ChangeScene(SceneType type) {
 
 	case SceneType::GamePlay:
 		currentScene_ = std::make_unique<GamePlayScene>(*this, shared_);
+		break;
+
+	case SceneType::NightSky:
+		currentScene_ = std::make_unique<NightSkyScene>();
 		break;
 
 

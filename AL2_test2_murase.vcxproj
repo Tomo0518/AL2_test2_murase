@@ -127,6 +127,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="GameShared.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3x3.cpp" />
+    <ClCompile Include="NightSkyScene.cpp" />
     <ClCompile Include="Object2D.cpp" />
     <ClCompile Include="Pad.cpp" />
     <ClCompile Include="Particle.cpp" />
@@ -193,6 +194,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonUtil.h" />
     <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="NightSkyScene.h" />
     <ClInclude Include="Object2D.h" />
     <ClInclude Include="Pad.h" />
     <ClInclude Include="Particle.h" />
